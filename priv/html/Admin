@@ -1,0 +1,19 @@
+<script>
+var ws = new WebSocket("wss://" + document.location.host + "/Admin","json")
+window.onmessage = function(msg) {
+	ws.send(msg.data);
+}
+var widgets = document.getElementsByTagName("iframe")
+ws.onmessage = function(msg) {
+	for (var i = 0; i < widgets.length; ++i) 
+		widgets[i].contentWindow.postMessage(msg.data,document.location.origin);
+}
+</script>
+<style>
+iframe {
+	border: 1px dotted;
+	overflow: none;
+}
+</style>
+<iframe width="300px" height="300px" src="/Users"></iframe>
+<iframe width="500px" height="300px" src="/User"></iframe>

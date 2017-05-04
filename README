@@ -1,0 +1,114 @@
+Orc Server
+==========
+
+This repository contains the Open Robotics Company Messaging Server.
+
+This is a general purpose Secure WebSocket server which supports,
+[json](http://json.org), [ujson](http://ujson.org), and binary 
+messages.  We use it as a LAN messaging hub for routing different
+subsets of device data stream to various processing engines. This
+server makes use of content based filtering that allows you to route
+messages based on the contents of the message payload.  We have
+found that content based routing gives us the greatest degree of
+flexibility in terms of defining a runtime messaging topology with 
+a minimal amount of configuration. 
+
+
+Getting Started
+---------------
+
+In the priv directory of the repo you will need to install:
+
+	cacert.pem	-- the cert for you CA
+	cert.pem	-- the signed cert for your server
+	key.pem		-- the private key you sign the CSR with
+
+You can use public certs such as those provided by letsencrypt, or
+as we recommend using your own self-signed certs managed by your own
+CA.  (We will be releasing code for running an ORC style CA of your 
+own in another project).
+
+Once you have the code installed on each of your nodes,
+start your nodes on your lan:
+	
+	orc node1@localhost node &
+	orc node2@localhost node &
+
+You can then initialize the database:
+
+	orc node1@localhost init node1@localhost node2@localhost
+
+Then start the servers of your cluster;
+
+	orc node1@localhost start 4433 node1@localhost node2@localhost
+	orc node2@localhost start 4434 node1@localhost node2@localhost
+
+This will start a two server cluster running on port 4433 4434
+
+
+You can get more help with:
+
+	orc help
+
+
+Setting Up Users
+----------------
+
+Before you can create a data stream, you will need to provision a
+user for your stream:
+
+	orc user add username email password
+	orc user grant username path
+
+The path can be something as simple as "/*" which will allow the
+user to access all data in the stream, or can limit it to messages
+with only specific attributes.
+
+For example, a path of:
+
+	/device=123/to=dave/*
+
+Will limit the user to only those messages which have the form:
+
+	{ "device": "123", "to": "dave", ... }
+
+The user is free to add further restrictions such as:
+
+	/device=123/to=dave/loc=nyc
+
+Requesting only messages like:
+
+	{ "device": "123", "to": "dave", "loc": "nyc", ... }
+
+But they will not have permissions to access messages that have 
+fewer restrictions.
+
+
+Connecting to the Server
+------------------------
+
+Assuming you install your CA cert in your browser of choice, you can
+access the server via JavaScript using the WebSocket object:
+
+	var ws = new WebSocket("wss://username:password@myserver.local:4433/device=123/to=dave","json");
+
+Note well the use of the Sec-WebSocket-Protocol header.  The valid
+values for supported protocols are json and ujson currently.  For feeds 
+which require no filtering, leaving the protocol blank will forward
+the raw messages.
+
+This example URL assumes you have signed the cert for a server 'myserver.local'
+and have provisioned a user of "username" with password "password".  The messages
+you will receive will be formatted in json (regardless if their origin was json, ujson,
+or another supported format).
+
+
+License
+-------
+
+This server is licensed under the 
+                    
+	GNU AFFERO GENERAL PUBLIC LICENSE
+
+see the LICENSE file for details.
+

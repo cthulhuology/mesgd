@@ -1,0 +1,61 @@
+<style>
+label {
+	display: inlineblock;
+	width: 10em;
+	float: left;
+}
+
+input {
+	display: inlineblock;
+	width: 20em;
+}
+
+#button {
+	margin-left: 12em;	
+}
+</style>
+<script>
+function addUser() {
+	var name = document.getElementById('name')
+	var email = document.getElementById('email')
+	var password = document.getElementById('password')
+	window.parent.postMessage(JSON.stringify({ 
+		Admin: "User", 
+		action: "add",
+		name: name.value, 
+		email: email.value, 
+		password: password.value,
+	}),document.location.origin);
+}
+function removeUser() {
+	var name = document.getElementById('name')
+	window.parent.postMessage(JSON.stringify({ 
+		Admin: "User", 
+		action: "remove",
+		name: name.value, 
+		email: email.value
+	}),document.location.origin);
+}
+
+window.onmessage = function(msg) {
+	var user = JSON.parse(msg.data)
+	if (user.Admin != "User") return;
+	var name = document.getElementById('name')
+	var email = document.getElementById('email')
+	var password = document.getElementById('password')
+	name.value = user.name
+	email.value = user.email
+	password.value = ''
+}
+</script>
+<div class="User">
+<h3>Edit User</h3>
+<form id="User">
+<div class="field"><label for="name">Name</label><input id="name" type="text" value=""></div>
+<div class="field"><label for="email">Email</label><input id="email" type="text" value=""></div>
+<div class="field"><label for="password">Password</label><input id="password" type="password" value=""></div>
+<div class="field"><input id="button" type="button" onclick="addUser()" value="Add User"></div>
+<div class="field"><input id="button" type="button" onclick="removeUser()" value="Remove User"></div>
+</form>
+</div>
+

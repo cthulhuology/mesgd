@@ -1,0 +1,65 @@
+<style>
+input[type="button"]{
+	display: block;
+	width: 20em;
+}
+</style>
+<script>
+var users = {};
+
+function listUsers() {
+	setTimeout(function() {
+		window.parent.postMessage(JSON.stringify({ 
+			Admin: "User", 
+			action: "list",
+		}),document.location.origin);
+	}, 1000);
+}
+
+function sendUser() {
+	window.parent.postMessage(JSON.stringify({ 
+		Admin: "User", 
+		name: name, 
+		email: email, 
+		password: ''
+	}),document.location.origin);
+}
+
+function removeUser(name) {
+	delete users[name];
+	var buttons = document.getElementsByTagName('input');
+	for (var i = 0; i < buttons.length; ++i) 
+		if (buttons[i].value == name) 
+			buttons[i].parentNode.removeChild(buttons[i]);
+}
+
+window.onmessage = function(msg) {
+	var user = JSON.parse(msg.data);
+	if (user.Admin != "User" || user.name == '') return;
+	var found = users.hasOwnProperty(user.name)
+	if (user.action == "remove") removeUser(user.name)
+	if (user.action == "list") return;
+	if (found) return;
+	users[user.name] = user;
+	var list = document.getElementById("UserList");
+	var button = document.createElement('input');
+	button.type = 'button';
+	button.value = user.name;
+	button.onclick = function() {
+		window.parent.postMessage(JSON.stringify(
+			users[this.value]
+		),document.location.origin)
+	}
+	list.appendChild(button);
+}
+
+window.onload = function() {
+	listUsers();
+}
+
+</script>
+<div class="UserList">
+<h3>Users</h3>
+<form id="UserList">
+</form>
+</div>
