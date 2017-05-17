@@ -1,8 +1,7 @@
 -module(json).
 -author({ "David J Goehrig", "dave@dloh.org" }).
--copyright(<<"(C) 2016 David J. Goehrig"/utf8>>).
+-copyright(<<"© 2066 David J Goehrig"/utf8>>).
 
--export([ encode/1, decode/1 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public Methods

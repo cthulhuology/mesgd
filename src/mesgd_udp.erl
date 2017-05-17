@@ -3,20 +3,20 @@
 -copyright(<<"© 2017 David J. Goehrig"/utf8>>).
 -behavior(gen_server).
 
--export([ start_link/1, send/3, stop/0, message/1 ]).
+-export([ start_link/3, send/3, stop/0, message/1 ]).
 -export([ init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3 ]).
 
 -include("../include/mesgd_http.hrl").
 
--record(mesgd_udp, { socket, prototocol }).
+-record(mesgd_udp, { socket, path, protocol }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Public Methods
 %%
 
 %% Starts a wocket bsocket by accepting a connection form Listen port
-start_link(Port,Protocol) ->
-	gen_server:start_link(?MODULE, [ Port, Protocol ], []).
+start_link(Port,Path,Protocol) ->
+	gen_server:start_link(?MODULE, [ Port, Path, Protocol ], []).
 
 %% Sends data to the udp socket at host port
 send(Host,Port,Data) ->
@@ -31,10 +31,10 @@ message(Data) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% gen_server methods
-init([ Port, Protocol ]) ->
-	{ ok, Socket } = gen_udp:open(
+init([ Port, Path, Protocol ]) ->
+	{ ok, Socket } = gen_udp:open(Port),
 	mesgd_router:connect(self(),Path),
-	{ ok, #mesgd_udp{ socket = Socket, protocol = Protocol }}.
+	{ ok, #mesgd_udp{ socket = Socket, path = Path, protocol = Protocol } }.
 
 handle_call(Message,_From,UDPSocket) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
@@ -43,7 +43,7 @@ handle_call(Message,_From,UDPSocket) ->
 handle_cast( stop, UDPSocket ) ->
 	{ stop, normal, UDPSocket };
 
-handle_cast({ message, Data }, UDPSocket = #mesd_udp{ socket = Socket, protocol = Protocol }) ->	
+handle_cast({ message, Data }, UDPSocket = #mesgd_udp{ socket = Socket, path = Path, protocol = Protocol }) ->	
 	error_logger:info_msg("~p (~p) : ~p~n", [ Path, Protocol, Data ]),
 	case Protocol of
 		<<"ujson">> -> mesgd_router:route( ujson:decode(Data) );
@@ -52,7 +52,7 @@ handle_cast({ message, Data }, UDPSocket = #mesd_udp{ socket = Socket, protocol 
 	end,
 	{ noreply, UDPSocket };
 
-handle_cast({ send, Host, Port, Message }, UDPSocket }) ->
+handle_cast({ send, Host, Port, Message }, UDPSocket = #mesgd_udp{ socket = Socket, protocol = Protocol }) ->
 	Data = case Protocol of
 		<<"ujson">> -> ujson:encode(Message);
 		<<"json">> -> json:encode(Message);
@@ -69,11 +69,11 @@ handle_cast(close, UDPSocket) ->
 	{ stop, normal, UDPSocket }.
 
 handle_info({udp, Socket, Data }, UDPSocket) ->
-	mesgd_router:route( [ { data, Data } ] )
+	mesgd_router:route( [ { data, Data } ] ),
 	{ noreply, UDPSocket };
 
 handle_info(Message, UDPSocket) ->
-	ok = gen_:send(UDPSocket,frame(Message)),
+	ok = gen_:send(UDPSocket,Message),
 	{ noreply, UDPSocket }.
 
 terminate( normal, UDPSocket = #mesgd_udp{ socket = Socket }) ->

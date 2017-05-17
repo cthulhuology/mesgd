@@ -2,7 +2,7 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2016,2017 David J Goehrig, Open Robotics Company LLC."/utf8>>).
 
--export([ match/2, scan/2, components/1, eval/2, validate/2, priv/0  ]).
+-export([ match/2, scan/2, components/1, eval/2, validate/2, priv/0, path_scan/2 ]).
 
 
 priv() ->
@@ -107,6 +107,15 @@ validate(_,[]) ->
 validate(_,_) ->
 	error_logger:info_msg("validate false~n"),
 	false.
+
+path_scan(_Path,[]) ->
+	undefined;
+
+path_scan(Path,[ { K, V } | Patterns ]) ->
+	case eval(Path,K) of
+		true -> V;
+		false -> path_scan(Path,Patterns)
+	end.	 
 	
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

@@ -54,7 +54,7 @@ init([]) ->
 	{ ok, #mesgd_dynamic{ routes = [] }}.
 
 handle_call({ get, Request = #request{ path = Path }}, _From, State = #mesgd_dynamic{ routes = Routes }) ->
-	case proplists:get_value(Path,Routes) of
+	case mesgd_path:path_scan(Path,Routes) of
 		undefined -> 
 			{ reply, mesgd_static:get(Request), State };
 		Module ->
