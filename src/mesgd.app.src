@@ -24,6 +24,7 @@
 	{mod, { mesgd_app, []}},
 	{env, [
 		{ port, 4433 },
+		{ admin_port, 4444 },
 		{ cluster, [ mesgd@localhost ]},
 		{ tables, [ mesgd_auth ]},
 		{ table_timeout, 20000 },
@@ -31,5 +32,6 @@
 		{ cacertfile, "cacert.pem" },
 		{ certfile, "cert.pem" },
 		{ keyfile, "key.pem" }
+
 	]}
 ]}.

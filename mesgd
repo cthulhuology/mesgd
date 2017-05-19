@@ -62,7 +62,7 @@ mesgd setup file
 	of users and their permissions. The format of
 	this file is:
 
-	{ users, [ { name, email, pass, paths... }, ... ]}.
+	{ users, [ { domain, name, email, pass, paths... }, ... ]}.
 
 ");
 
@@ -71,8 +71,8 @@ process(Server, [ "setup", File ]) ->
 	{ ok, Config } = file:consult(File),
 	io:format("loading config ~p~n", [ Config ]),
 	Users = proplists:get_value(users, Config),
-	[ setup_user(Server, User, Email, Pass, Paths) ||
-		{ User, Email, Pass, Paths } <- Users ],
+	[ setup_user(Server, Domain, User, Email, Pass, Paths) ||
+		{ Domain, User, Email, Pass, Paths } <- Users ],
 	rpc:call(Server,mnesia,sync_log,[]),
 	io:format("done~n");
 
@@ -219,30 +219,30 @@ mesgd user [list|add|remove|grant|revoke]
 
 ");
 
-process(Server,["user","add",User,Email,Password]) ->
+process(Server,["user","add",Domain,User,Email,Password]) ->
 	ok = connect(Server),
-	rpc:call(Server, mesgd_auth, add, [ User, Email, Password ]);
+	rpc:call(Server, mesgd_user, add, [ Domain, User, Email, Password ]);
 
-process(Server,["user","auth", Path, User, Password]) ->
+process(Server,["user","auth", Path, Domain, User, Password]) ->
 	ok = connect(Server),
-	Res = rpc:call(Server, mesgd_auth, test, [ Path, User, Password ]),
+	Res = rpc:call(Server, mesgd_auth, test, [ Path, Domain, User, Password ]),
 	io:format("~p~n", [ Res ]);
 
-process(Server,["user","remove",User,Email]) ->
+process(Server,["user","remove",Domain, User]) ->
 	ok = connect(Server),
-	rpc:call(Server, mesgd_auth, remove,[ User, Email ]);
+	rpc:call(Server, mesgd_user, remove,[ Domain, User ]);
 
-process(Server,["user","grant", User, Pattern ]) ->
+process(Server,["user","grant", Domain, User, Pattern ]) ->
 	ok = connect(Server),
-	rpc:call(Server, mesgd_auth, grant, [ User, Pattern ]);	
+	rpc:call(Server, mesgd_auth, grant, [ Domain, User, Pattern ]);	
 
-process(Server,["user","revoke", User, Pattern ]) ->
+process(Server,["user","revoke", Domain, User, Pattern ]) ->
 	ok = connect(Server),
-	rpc:call(Server, mesgd_auth, revoke, [ User, Pattern ]);
+	rpc:call(Server, mesgd_auth, revoke, [ Domain, User, Pattern ]);
 
-process(Server,["user","list"]) ->
+process(Server,["user","list",Domain]) ->
 	ok = connect(Server),
-	Users = rpc:call(Server, mesgd_auth, users, []),
+	Users = rpc:call(Server, mesgd_user, users, [Domain]),
 	io:format("~p~n", [ Users ]);
 
 
@@ -283,12 +283,12 @@ usage: mesgd [node] [node|init|setup|start|stop|status|console|observer|user]
 	observer 			- run the observer on a node
 
 	user [node] [list|add|remove|grant|revoke]
-		list			- list all users by name
-		add user email pass	- add a user
-		remove user email	- remove a user
-		grant user path		- grant access to a path
-		revoke user path	- remove access to a path
-		auth path user pass	- test the user authentication
+		list domain			- list all users by name
+		add domain user email pass	- add a user
+		remove domain user 		- remove a user
+		grant domain user path		- grant access to a path
+		revoke domain user path		- remove access to a path
+		auth path domain user pass	- test the user authentication
 
 ").
 
@@ -300,9 +300,9 @@ set_cookie() ->
 			ok
 	end.
 
-setup_user(Server,User,Email,Password,Paths) ->
-	rpc:call(Server, mesgd_auth, add, [ User, Email, Password ]),
-	[ rpc:call(Server, mesgd_auth, grant, [ User, Path ]) ||
+setup_user(Server,Domain, User,Email,Password,Paths) ->
+	ok = rpc:call(Server, mesgd_user, add, [ Domain, User, Email, Password ]),
+	[ rpc:call(Server, mesgd_auth, grant, [ Domain, User, Path ]) ||
 		Path <- Paths ].
 
 eol() ->

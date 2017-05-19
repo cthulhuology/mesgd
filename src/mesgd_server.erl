@@ -2,20 +2,21 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2016 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/1, stop/1, accept/1 ]).
+-export([ start_link/2, stop/1, accept/1 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
 -define(SELF, list_to_atom(?MODULE_STRING ++ "_" ++ integer_to_list(Port))).
--record(mesgd_server, { port, socket }).
+-record(mesgd_server, { port, socket, domain, router }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
-start_link(Port) ->
+start_link(Port,Domain) ->
 	gen_server:start_link({ local, ?SELF }, ?MODULE, #mesgd_server{
-		port = Port
+		port = Port,
+		domain = Domain
 	}, []).
 
 stop(Port) ->
@@ -62,8 +63,8 @@ handle_call(Message,_From,Server) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
 	{ reply, ok, Server }.
 
-handle_cast(accept,Server = #mesgd_server{ socket = Socket, port = Port }) ->
-	mesgd:start_link(Socket),
+handle_cast(accept,Server = #mesgd_server{ socket = Socket, port = Port, domain = Domain }) ->
+	mesgd_client:start_link(Socket,Domain),
 	accept(Port),
 	{ noreply, Server };
 

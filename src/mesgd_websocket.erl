@@ -3,7 +3,7 @@
 -copyright(<<"© 2012,2013 David J. Goehrig"/utf8>>).
 -behavior(gen_server).
 
--export([ get/1, start_link/1, send/2, stop/1, connect/5, message/2 ]).
+-export([ upgrade/1, response/1, start_link/1, send/2, stop/1, connect/5, message/2 ]).
 -export([ init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3 ]).
 
 -include("../include/mesgd_http.hrl").
@@ -24,20 +24,18 @@ send(WebSocket,Data) ->
 stop(WebSocket) ->
 	gen_server:cast(WebSocket,stop).
 
+upgrade(Headers) ->
+	case proplists:get_value(<<"Upgrade">>, Headers) of
+		<<"websocket">> -> true;
+		_ -> false
+	end.
 
 %% returns true if the request is a websocket request
-get(Request = #request{ path = Path }) ->
-	io:format("websocket got ~p~n", [ Request ]),
-	case mesgd_auth:auth(Request) of 
-		Request2 = #request{} ->
-			error_logger:info_msg("Authorized ~p~n", [ Path ]),
-			check_version(Request2);
-		Response = #response{} ->
-			error_logger:error_msg("Authentication failure ~p~n", [ Request ]),
-			Response
-	end;		
+response(Request = #request{ path = Path }) ->
+	error_logger:info_msg("websocket request ~p~n", [ Path ]),
+	check_version(Request);
 
-get(Response = #response{}) ->
+response(Response = #response{}) ->
 	Response.
 
 connect(Host,Port,Path,User,Password) ->

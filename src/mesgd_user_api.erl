@@ -9,13 +9,34 @@
 init() ->
 	{ "/user/*", ?MODULE }.
 
-get(Request = #request{ path = Path, headers = Headers, body = Body }) ->
-	error_logger:info_msg("Got user request ~p~n", [ Request ]),
-	<<"user api get~n">>.
+get(Request = #request{ path = Path, headers = _Headers, body = _Body }) ->
+	case string:tokens(Path,"/") of
+		[ "user", Domain ] ->
+			error_logger:info_msg("Looking up all users"),
+			json:encode(mesgd_user:users(Domain));
+		[ "user", Domain, Name ] ->
+			User = mesgd_user:user(Domain,Name),
+			json:encode(User);
+		_ -> 	
+			json:encode([])
+	end.
 	
 put(Request = #request{ path = Path, headers = Headers, body = Body }) ->
-	error_logger:info_msg("Got user request ~p~n", [ Request ]),
-	<<"user api put~n">>.
+	case string:tokens(Path,"/") of
+		[ "user", Name ] ->
+			UserName = list_to_binary(Name),
+			User = json:decode(Body),
+			UserName = proplists:get_value(<<"name">>,User),
+			Email = proplists:get_value(<<"email">>,User),
+			Password = proplists:get_value(<<"password">>,User),
+			Domain = proplists:get_value(<<"domain">>,User),
+			Paths = proplists:get_value(<<"paths">>, User),
+			ok = mesgd_user:add(Domain,Name,Email,Password),
+			[ mesgd_auth:grant(Domain,Name,Path) || Path <- Paths ],
+			json:encode(mesgd_user:user(Domain,Name));
+		_ -> 
+			json:encode([])
+	end.
 	
 post(Request = #request{ path = Path, headers = Headers, body = Body }) ->
 	error_logger:info_msg("Got user request ~p~n", [ Request ]),

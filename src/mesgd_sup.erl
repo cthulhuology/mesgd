@@ -4,13 +4,15 @@
 -export([init/1]).
 
 
--define(ORC_SERVER(P), list_to_atom("mesgd_server_" ++ integer_to_list(P))).
+-define(MESGD_SERVER(P), list_to_atom("mesgd_server_" ++ integer_to_list(P))).
+-define(MESGD_HTTP_ROUTER(D), list_to_atom("mesgd_http_router_" ++ D)).
 
 start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
 	{ ok, Port} = application:get_env(mesgd,port),
+	{ ok, AdminPort } = application:get_env(mesgd,admin_port),
 	{ ok, Nodes } = application:get_env(mesgd,cluster),
 	{ok, { {one_for_one, 5, 10}, [
 		#{ id => mesgd_cluster,
@@ -45,14 +47,21 @@ init([]) ->
 		modules => [ 
 			mesgd_router
 		]},
-		#{ id => mesgd_dynamic,
-		start => { mesgd_dynamic, start_link, []},
+		#{ id => ?MESGD_HTTP_ROUTER("localhost"),
+		start => { mesgd_http_router, start_link, [<<"localhost">>]},
 		restart => permanent,
 		shutdown => brutal_kill,
 		type => worker,
 		modules => [
-			mesgd_dynamic,
-			mesgd_static
+			mesgd_http_router
+		]},
+		#{ id => ?MESGD_HTTP_ROUTER("admin"),
+		start => { mesgd_http_router, start_link, [<<"admin">>]},
+		restart => permanent,
+		shutdown => brutal_kill,
+		type => worker,
+		modules => [
+			mesgd_http_router
 		]},
 		#{ id => mesgd_admin,
 		start => { mesgd_admin, start_link, []},
@@ -60,14 +69,28 @@ init([]) ->
 		shutdown => brutal_kill,
 		type => worker,
 		modules => [
-			mesgd_admin
+			mesgd_admin,
+			mesgd_http_router
 		]},
-		#{ id => ?ORC_SERVER(Port),
-		start => { mesgd_server, start_link, [ Port ]},
+		#{ id => ?MESGD_SERVER(Port),
+		start => { mesgd_server, start_link, [ 
+			Port, <<"localhost">> ]},
 		restart => permanent,
 		shutdown => brutal_kill,
 		type => worker,
 		modules => [ 
+			mesgd_http_router,
+			mesgd_server,
+			mesgd
+		]},
+		#{ id => ?MESGD_SERVER(AdminPort),
+		start => { mesgd_server, start_link, [
+			AdminPort, <<"admin">> ]},
+		restart => permanent,
+		shutdown => brutal_kill,
+		type => worker,
+		modules => [ 
+			mesgd_admin_http_router,
 			mesgd_server,
 			mesgd
 		]}
