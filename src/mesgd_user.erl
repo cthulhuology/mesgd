@@ -2,9 +2,10 @@
 -copyright(<<"© 2017 David J Goehrig, Open Robotics Company LLC."/utf8>>).
 -compile({no_auto_import,[get/1]}).
 
- -export([user/2, add/4, remove/2, users/1 ]).
+-export([user/2, add/4, remove/2, users/1, details/2, detail/4, install/1 ]).
 
 -include("include/mesgd_auth.hrl").
+-include("include/mesgd_user.hrl").
 
 add(Domain,User,Email,Password) when is_list(Domain) ->
 	add(list_to_binary(Domain),User,Email,Password);
@@ -22,6 +23,7 @@ add(Domain,User,Email,Password) ->
 		remove(Domain,User),
 		ok = mnesia:write(#mesgd_auth{ token = Token, domain = Domain, user = User, email = Email, active = true, paths = [] }),
 		error_logger:info_msg("Add User ~p <~p>", [ User, Email ]),
+		detail(User,Domain,email,Email),
 		ok
 	end,
 	mnesia:activity(transaction,F).
@@ -66,3 +68,32 @@ user(Domain,Name) ->
 		end
 	end,
 	mnesia:activity(transaction,F).
+
+%% fetches the extended metadata concerning a user by username and domain
+details(User,Domain) ->
+	F = fun() ->
+		case mnesia:read(mesgd_user,{ User, Domain }, write) of
+			[ #mesgd_user{ uid = { User, Domain }, user = User, domain = Domain, active = true, properties = Properties } ] ->
+				[ { user, User }, { domain, Domain } | Properties ];
+			_ ->
+				[]
+		end
+	end,
+	mnesia:activity(transaction,F).
+
+%% set an extended bit of metadata on a user for a domain
+detail(User,Domain,Key,Value) ->
+	F = fun() ->
+		case mnesia:wread(mesgd_user,{User,Domain},write) of
+			[#mesgd_user{ uid = { User, Domain }, user = User, domain = Domain, active = true, properties = Properties } ] ->
+				ok = mnesia:write(#mesgd_user{ uid = { User, Domain }, user = User, domain = Domain, active = true, properties = [ { Key, Value } | proplists:delete(Key,Properties) ] });
+			_ ->
+				ok = mnesia:write(#mesgd_user{ uid = { User, Domain }, user = User, domain = Domain, active = true, properties = [ { Key, Value } ] })
+		end
+	end,
+	mnesia:activity(transaction,F).
+
+install(Nodes) ->
+	{ atomic, ok } = mnesia:create_table(mesgd_user, [
+		{ attributes, record_info(fields,mesgd_user) },
+		{ disc_copies, Nodes }]).

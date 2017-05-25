@@ -5,6 +5,7 @@
 
 -include("include/mesgd_http.hrl").
 -include("include/mesgd_auth.hrl").
+-include("include/mesgd_user.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API

@@ -26,7 +26,7 @@
 		{ port, 4433 },
 		{ admin_port, 4444 },
 		{ cluster, [ mesgd@localhost ]},
-		{ tables, [ mesgd_auth ]},
+		{ tables, [ mesgd_auth, mesgd_user ]},
 		{ table_timeout, 20000 },
 		{ salt, <<"thisisareallyterriblesaltdon'tuse">> },
 		{ cacertfile, "cacert.pem" },
