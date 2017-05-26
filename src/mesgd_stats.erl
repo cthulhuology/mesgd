@@ -29,8 +29,8 @@ init([Sample,Store]) ->
 		time = erlang:system_time(), 
 		duration = Store,
 		samples = Store / Sample,
-		clients_in = [0],
-		clients_out = [0],
+		http_in = [0],
+		http_out = [0],
 		data_in = [0],
 		data_out = [0],
 		msgs_in = [0],
@@ -44,10 +44,10 @@ handle_call(Message,_From, State) ->
 	{ reply, ok, State }.
 
 handle_cast({record, Event}, { T1, T2, Stats = #mesgd_stats{
-	clients_in = ClientsIn, clients_out = ClientsOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
+	http_in = HttpIn, http_out = HttpOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
 	auth_ack = AuthAck, auth_nak = AuthNack }}) ->
-	ClientsIn2 = update(clients_in,ClientsIn,Event),
-	ClientsOut2 = update(clients_out,ClientsOut,Event),
+	HttpIn2 = update(http_in,HttpIn,Event),
+	HttpOut2 = update(http_out,HttpOut,Event),
 	DataIn2 = update(data_in,DataIn,Event),
 	DataOut2 = update(data_out,DataOut,Event),
 	MsgsIn2 = update(msgs_in,MsgsIn,Event),
@@ -55,8 +55,8 @@ handle_cast({record, Event}, { T1, T2, Stats = #mesgd_stats{
 	AuthAck2 = update(auth_ack,AuthAck,Event),
 	AuthNack2 = update(auth_nak,AuthNack,Event),
 	{ noreply, {T1,T2,Stats#mesgd_stats{
-		clients_in = ClientsIn2,
-		clients_out = ClientsOut2,
+		http_in = HttpIn2,
+		http_out = HttpOut2,
 		data_in = DataIn2,
 		data_out = DataOut2,
 		msgs_in = MsgsIn2,
@@ -65,12 +65,12 @@ handle_cast({record, Event}, { T1, T2, Stats = #mesgd_stats{
 		auth_nak = AuthNack2 }}};
 
 handle_cast(sample, { T1, T2, Stats = #mesgd_stats{ samples = Samples,
-	clients_in = ClientsIn, clients_out = ClientsOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
+	http_in = HttpIn, http_out = HttpOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
 	auth_ack = AuthAck, auth_nak = AuthNack }}) ->
 		notify(Stats),
 		{ noreply,  { T1, T2, Stats#mesgd_stats{ 
-			clients_in = window(ClientsIn,Samples),
-			clients_out = window(ClientsOut,Samples),
+			http_in = window(HttpIn,Samples),
+			http_out = window(HttpOut,Samples),
 			data_in = window(DataIn,Samples),
 			data_out = window(DataOut,Samples),
 			msgs_in = window(MsgsIn,Samples),
@@ -79,15 +79,15 @@ handle_cast(sample, { T1, T2, Stats = #mesgd_stats{ samples = Samples,
 			auth_nak = window(AuthNack,Samples) }}};
 
 handle_cast(store, { T1, T2, Stats = #mesgd_stats{  time = Time, samples = Samples, duration = Duration, domain = Domain,
-	clients_in = ClientsIn, clients_out = ClientsOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
+	http_in = HttpIn, http_out = HttpOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
 	auth_ack = AuthAck, auth_nak = AuthNack }}) ->
 	Summary = #mesgd_stats{
 		time = Time,
 		samples = Samples,
 		duration = Duration,
 		domain = Domain,
-		clients_in = persec(ClientsIn,Duration),
-		clients_out = persec(ClientsOut,Duration),
+		http_in = persec(HttpIn,Duration),
+		http_out = persec(HttpOut,Duration),
 		data_in = persec(DataIn,Duration),
 		data_out = persec(DataOut,Duration),
 		msgs_in = persec(MsgsIn,Duration),
@@ -143,23 +143,23 @@ update(Key,Stat = [N|T],Event) ->
 	end.
 
 notify(#mesgd_stats{ samples = Samples, duration = Duration, domain = Domain, 
-	clients_in = ClientsIn, clients_out = ClientsOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
+	http_in = HttpIn, http_out = HttpOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
 	auth_ack = AuthAck, auth_nak = AuthNack }) ->
 	Message = [
 		{ time, erlang:system_time() },
 		{ duration, Duration },
 		{ samples, Samples },
 		{ domain, Domain },
-		{ clients_in, latest(ClientsIn) },
-		{ clients_out, latest(ClientsOut) },
+		{ http_in, latest(HttpIn) },
+		{ http_out, latest(HttpOut) },
 		{ data_in, latest(DataIn) },
 		{ data_out, latest(DataOut) },
 		{ msgs_in, latest(MsgsIn) },
 		{ msgs_out, latest(MsgsOut) },
 		{ auth_ack, latest(AuthAck) },
 		{ auth_nak, latest(AuthNack) },
-		{ clients_in_ps, persec(ClientsIn,Duration) },
-		{ clients_out_ps, persec(ClientsOut,Duration) },
+		{ http_in_ps, persec(HttpIn,Duration) },
+		{ http_out_ps, persec(HttpOut,Duration) },
 		{ data_in_ps, persec(DataIn,Duration) },
 		{ data_out_ps, persec(DataOut,Duration) },
 		{ msgs_in_ps, persec(MsgsIn,Duration) },

@@ -64,7 +64,6 @@ request(Http = #request{ stage = _ }, NewData) ->
 	error_logger:error_msg("unknown http protocol stage, got data ~p", [ NewData ]),
 	Http.
 
-
 response(#response{ status = Code, headers = Headers, body = Body}) ->
 	Reason = status(Code),
 	error_logger:info_msg("Headers ~p~", [ Headers ]),

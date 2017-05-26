@@ -2,7 +2,7 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2017 David J Goehrig, Open Robotics Company LLC."/utf8>>).
 -behavior(gen_server).
--export([ start_link/0, add/3, remove/3, install/1 ]).
+-export([ start_link/0, add/3, remove/3, install/1, log/1 ]).
 -export([ init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3 ]).
 
 -record(mesgd_master, { nodes }).
@@ -19,6 +19,9 @@ add(Name,Domain,Ip) ->
 
 remove(Name,Domain,Ip) ->
 	gen_server:call(?MODULE, { remove, Name, Domain, Ip }).
+
+log(Message) ->
+	gen_server:cast(?MODULE, { log, Message }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Private API
@@ -44,8 +47,12 @@ handle_call({ remove, Name, Domain, Ip }, _From, Master = #mesgd_master{ nodes =
 	{ reply, ok, Master#mesgd_master{ nodes = lists:delete(Node,Nodes) } };
 
 handle_call(Message,_From,Master) ->
-	error_logger:error("Unknown message ~p~n", [ Message ]),
+	error_logger:error_msg("Unknown message ~p~n", [ Message ]),
 	{ reply, ok, Master }.
+
+handle_cast({log, Mesage},Master) ->
+	error_logger:info_msg("Stats: ~p~n", [ Message ]),
+	{ noreply, Master }.
 
 handle_cast(Message,Master) ->
 	error_logger:error("Unknown message ~p~n", [ Message ]),

@@ -50,6 +50,7 @@ handle_cast(stop,State) ->
 
 handle_cast(Response = #response{},Client = #mesgd_client{ socket = Socket }) ->
 	Bin = mesgd_http:response(Response),
+	mesgd_stats:record([{data_out, byte_size(Bin) },{ http_out, 1 }]),
 	ssl:send(Socket,Bin),
 	{ noreply, Client };
 
@@ -61,6 +62,8 @@ handle_info({ ssl, Socket, Data }, Client = #mesgd_client{ request = Req }) ->
 	Request = mesgd_http:request(Req,Data),
 	case Request#request.stage of
 		done ->
+			%% need to grab the full request data
+			mesgd_stats:record([{data_in, byte_size(Req#request.data)}, { http_in, 1}]),
 			handle_request(Request,Client),
 			{ noreply, Client#mesgd_client{ request = #request{ socket = Socket } }};
 		_ ->
@@ -92,4 +95,5 @@ handle_request(Request = #request{ headers = Headers, socket = Socket }, #mesgd_
 			mesgd_http_router:response(Domain,Request2)
 	end,
 	Bin = mesgd_http:response(Response),
+	mesgd_stats:record([{ data_out, byte_size(Bin) }, { http_out, 1 }]),
 	ssl:send(Socket,Bin).

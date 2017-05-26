@@ -52,13 +52,16 @@ auth(Domain,Request = #request{ path = Path, headers = Headers }) ->
 					mesgd_path:eval(Path,Pattern) or Match end, false, Paths) of
 					true ->
 						error_logger:info_msg("Allow ~p <~p> for ~p", [ User, Email, Path ]),
+						mesgd_stats:record([{auth_ack,1}]),
 						Request#request{ headers = [ { <<"User">>, User},{<<"Email">>,Email } | Headers ] };
 					false ->
 						error_logger:info_msg("Deny ~p <~p> for ~p", [ User, Email, Path ]),
+						mesgd_stats:record([{auth_nak,1}]),
 						#response{ status = 401, headers = [{  <<"WWW-Authenticate">>,<<"Basic realm=\"mesgd\"">> }, {<<"Content-Length">>, <<"0">> }]}
 				end;
 			Any ->
 				error_logger:info_msg("Deny token ~p for ~p cause ~p", [ Auth, Path, Any ]),
+				mesgd_stats:record([{auth_nak,1}]),
 				#response{ status = 401, headers = [{  <<"WWW-Authenticate">>,<<"Basic realm=\"mesgd\"">> }, {<<"Content-Length">>, <<"0">> }]}
 		end
 	end,

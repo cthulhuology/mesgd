@@ -46,18 +46,21 @@ connect(Host,Port,Path,User,Password) ->
 	UserBin = binary:list_to_bin(User),
 	PassBin = binary:list_to_bin(Password),
 	Token = base64:encode(<< UserBin/binary, ":", PassBin/binary >>),
-	ok = ssl:send(Socket,<<"GET ", PathBin/binary, " HTTP/1.1\r\n",
+	Bin = <<"GET ", PathBin/binary, " HTTP/1.1\r\n",
 	"Host: ", HostBin/binary,":",PortBin/binary,"\r\n",
 	"Upgrade: websocket\r\n",
 	"Sec-WebSocket-Protocol: json\r\n",
 	"Sec-WebSocket-Version: 13\r\n",
 	"Sec-WebSocket-Key: 123\r\n",
 	"Authorization: Basic ", Token/binary, "\rr\n",
-	"\r\n">>),
+	"\r\n">>,
+	mesgd_stats:record([{ data_out, byte_size(Bin) }]),
+	ok = ssl:send(Socket,Bin),
 	Socket.
 
 message(Socket,Data) ->
 	Bin = frame(json:encode(Data),1,true),
+	mesgd_stats:record({data_out,byte_size(Bin)},{msgs_out,1}),
 	ssl:send(Socket,Bin).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,6 +88,7 @@ handle_cast( stop, WebSocket ) ->
 
 handle_cast({ message, Data }, WebSocket = #websocket{ path = Path, protocol = Protocol }) ->	
 	error_logger:info_msg("~p (~p) : ~p~n", [ Path, Protocol, Data ]),
+	mesgd_stats:record([{ data_in, byte_size(Data)},{ msgs_in, 1}]),
 	case Protocol of
 		<<"ujson">> -> mesgd_router:route( ujson:decode(Data) );
 		<<"json">> -> mesgd_router:route( json:decode(Data) );
@@ -98,11 +102,15 @@ handle_cast({ send, Message }, WebSocket = #websocket { socket = Socket, protoco
 		<<"json">> -> json:encode(Message);
 		_ -> Message
 	end,
-	ok = ssl:send(Socket,frame(Data)),
+	Bin = frame(Data),
+	mesgd_stats:record([{ data_out, byte_size(Bin)},{ msgs_out, 1}]),
+	ok = ssl:send(Socket,Bin),
 	{ noreply, WebSocket };
 
 handle_cast(ping, WebSocket = #websocket{ socket = Socket }) -> 
-	ssl:send(Socket,frame(<<"pong">>,10)),	%% send pong
+	Bin = frame(<<"pong">>,10),
+	mesgd_stats:record([{ data_out, byte_size(Bin)}, { msgs_out, 1}]),
+	ssl:send(Socket,Bin),	%% send pong
 	{ noreply, WebSocket };
 
 handle_cast(pong,WebSocket) ->
@@ -127,7 +135,9 @@ handle_info({ssl_closed, _Socket }, WebSocket) ->
 	{ stop, normal, WebSocket };
 
 handle_info(Message, WebSocket = #websocket{ socket = Socket}) ->
-	ok = ssl:send(Socket,frame(Message)),
+	Bin = frame(Message),
+	mesgd_stats:record([{ data_out, byte_size(Bin) }, {msgs_out, 1}]),
+	ok = ssl:send(Socket,Bin),
 	{ noreply, WebSocket }.
 
 terminate( normal, #websocket{ socket = Socket }) ->
