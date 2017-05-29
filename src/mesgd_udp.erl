@@ -27,7 +27,7 @@ stop() ->
 	gen_server:cast(?MODULE,stop).
 
 message(Data) ->
-	gen_server:cast(?MODULE, { message,data }).
+	gen_server:cast(?MODULE, { message,Data }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% gen_server methods
@@ -43,7 +43,7 @@ handle_call(Message,_From,UDPSocket) ->
 handle_cast( stop, UDPSocket ) ->
 	{ stop, normal, UDPSocket };
 
-handle_cast({ message, Data }, UDPSocket = #mesgd_udp{ socket = Socket, path = Path, protocol = Protocol }) ->	
+handle_cast({ message, Data }, UDPSocket = #mesgd_udp{ socket = _Socket, path = Path, protocol = Protocol }) ->	
 	error_logger:info_msg("~p (~p) : ~p~n", [ Path, Protocol, Data ]),
 	case Protocol of
 		<<"ujson">> -> mesgd_router:route( ujson:decode(Data) );
@@ -68,7 +68,7 @@ handle_cast({ unknown, Any }, UDPSocket) ->
 handle_cast(close, UDPSocket) ->
 	{ stop, normal, UDPSocket }.
 
-handle_info({udp, Socket, Data }, UDPSocket) ->
+handle_info({udp, _Socket, Data }, UDPSocket) ->
 	mesgd_router:route( [ { data, Data } ] ),
 	{ noreply, UDPSocket };
 
@@ -76,7 +76,7 @@ handle_info(Message, UDPSocket) ->
 	ok = gen_:send(UDPSocket,Message),
 	{ noreply, UDPSocket }.
 
-terminate( normal, UDPSocket = #mesgd_udp{ socket = Socket }) ->
+terminate( normal, _UDPSocket = #mesgd_udp{ socket = Socket }) ->
 	mesgd_router:close(self()),
 	ssl:close(Socket),
 	ok;

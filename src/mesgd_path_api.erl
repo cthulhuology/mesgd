@@ -9,19 +9,19 @@
 init() ->
 	{ "/path/*", ?MODULE }.
 
-get(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+get(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got path request ~p~n", [ Request ]),
 	<<"path api get~n">>.
 	
-put(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+put(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got path request ~p~n", [ Request ]),
 	<<"path api put~n">>.
 	
-post(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+post(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got path request ~p~n", [ Request ]),
 	<<"path api post~n">>.
 	
-delete(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+delete(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got path request ~p~n", [ Request ]),
 	<<"path api delete~n">>.
 	

@@ -9,19 +9,19 @@
 init() ->
 	{ "/cluster/*", ?MODULE }.
 
-get(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+get(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got cluster request ~p~n", [ Request ]),
 	<<"cluster api get~n">>.
 	
-put(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+put(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got cluster request ~p~n", [ Request ]),
 	<<"cluster api put~n">>.
 	
-post(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+post(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got cluster request ~p~n", [ Request ]),
 	<<"cluster api post~n">>.
 	
-delete(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+delete(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got cluster request ~p~n", [ Request ]),
 	<<"cluster api delete~n">>.
 	

@@ -9,7 +9,7 @@
 init() ->
 	{ "/user/*", ?MODULE }.
 
-get(Request = #request{ path = Path, headers = _Headers, body = _Body }) ->
+get(#request{ path = Path, headers = _Headers, body = _Body }) ->
 	case string:tokens(Path,"/") of
 		[ "user", Domain ] ->
 			error_logger:info_msg("Looking up all users"),
@@ -21,7 +21,7 @@ get(Request = #request{ path = Path, headers = _Headers, body = _Body }) ->
 			json:encode([])
 	end.
 	
-put(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+put(#request{ path = Path, headers = _Headers, body = Body }) ->
 	case string:tokens(Path,"/") of
 		[ "user", Name ] ->
 			UserName = list_to_binary(Name),
@@ -32,17 +32,17 @@ put(Request = #request{ path = Path, headers = Headers, body = Body }) ->
 			Domain = proplists:get_value(<<"domain">>,User),
 			Paths = proplists:get_value(<<"paths">>, User),
 			ok = mesgd_user:add(Domain,Name,Email,Password),
-			[ mesgd_auth:grant(Domain,Name,Path) || Path <- Paths ],
+			[ mesgd_auth:grant(Domain,Name,P) || P <- Paths ],
 			json:encode(mesgd_user:user(Domain,Name));
 		_ -> 
 			json:encode([])
 	end.
 	
-post(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+post(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got user request ~p~n", [ Request ]),
 	<<"user api post~n">>.
 	
-delete(Request = #request{ path = Path, headers = Headers, body = Body }) ->
+delete(Request = #request{ path = _Path, headers = _Headers, body = _Body }) ->
 	error_logger:info_msg("Got user request ~p~n", [ Request ]),
 	<<"user api delete~n">>.
 	

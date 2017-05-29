@@ -50,9 +50,9 @@ handle_call(Message,_From,Master) ->
 	error_logger:error_msg("Unknown message ~p~n", [ Message ]),
 	{ reply, ok, Master }.
 
-handle_cast({log, Mesage},Master) ->
+handle_cast({log, Message},Master) ->
 	error_logger:info_msg("Stats: ~p~n", [ Message ]),
-	{ noreply, Master }.
+	{ noreply, Master };
 
 handle_cast(Message,Master) ->
 	error_logger:error("Unknown message ~p~n", [ Message ]),
