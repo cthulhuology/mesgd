@@ -6,7 +6,7 @@
 -export([ init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3 ]).
 
 -record(mesgd_master, { nodes }).
--record(mesgd_node, { name, domain, ip }).
+-record(mesgd_node, { name, domain, ip, created, destroyed }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API

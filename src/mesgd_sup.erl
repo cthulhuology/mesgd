@@ -14,6 +14,7 @@ init([]) ->
 	{ ok, Port} = application:get_env(mesgd,port),
 	{ ok, AdminPort } = application:get_env(mesgd,admin_port),
 	{ ok, Nodes } = application:get_env(mesgd,cluster),
+	{ ok, Master } = application:get_env(mesgd,master),
 	{ok, { {one_for_one, 5, 10}, [
 		#{ id => mesgd_cluster,
 		start => { mesgd_cluster, start_link, [Nodes]},
@@ -93,5 +94,14 @@ init([]) ->
 			mesgd_admin_http_router,
 			mesgd_server,
 			mesgd
+		]},
+		#{ id => mesgd_startup,
+		start => { mesgd_startup, start, [ Master ]},
+		restart => transient,
+		shutdown => brutal_kill,
+		type => worker,
+		modules => [
+			mesgd_startup,
+			mesgd_master
 		]}
 	]}}.
