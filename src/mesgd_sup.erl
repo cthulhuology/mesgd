@@ -15,6 +15,8 @@ init([]) ->
 	{ ok, AdminPort } = application:get_env(mesgd,admin_port),
 	{ ok, Nodes } = application:get_env(mesgd,cluster),
 	{ ok, Master } = application:get_env(mesgd,master),
+	{ ok, Sample } = application:get_env(mesgd,sample_rate),
+	{ ok, Store } = application:get_env(mesgd,store_rate),
 	{ok, { {one_for_one, 5, 10}, [
 		#{ id => mesgd_cluster,
 		start => { mesgd_cluster, start_link, [Nodes]},
@@ -103,5 +105,13 @@ init([]) ->
 		modules => [
 			mesgd_startup,
 			mesgd_master
+		]},
+		#{ id => mesgd_stats,
+		start => { mesgd_stats, start_link, [ Master, Sample, Store ] },
+		restart => permanent,
+		shutdown => brutal_kill,
+		type => worker,
+		modules => [
+			mesgd_stats
 		]}
 	]}}.

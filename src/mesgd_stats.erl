@@ -5,13 +5,13 @@
 
 -include("../include/mesgd_stats.hrl").
 
--export([start_link/2, install/1, record/1, sample/0, store/0 ]).
+-export([start_link/3, install/1, record/1, sample/0, store/0 ]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
 
 %% start a stats server, sample every Sample seconds, and store every Store seconds usually 1,60 
-start_link(Sample,Store) ->
-	gen_server:start_link({ local, ?MODULE  }, ?MODULE, [ Sample, Store ], [] ).
+start_link(Master, Sample,Store) ->
+	gen_server:start_link({ local, ?MODULE  }, ?MODULE, [ Master, Sample, Store ], [] ).
 
 record(Event) ->
 	gen_server:cast(?MODULE, { record, Event }).
@@ -22,10 +22,11 @@ sample() ->
 store() ->
 	gen_server:cast(?MODULE, store ).
 
-init([Sample,Store]) ->
+init([Master, Sample,Store]) ->
 	{ ok, SampleTimer } = timer:apply_interval(Sample*1000,?MODULE,sample,[]),
 	{ ok, StoreTimer } = timer:apply_interval(Store*1000,?MODULE,store,[]),
 	{ ok, { SampleTimer, StoreTimer, #mesgd_stats{ 
+		master = Master,
 		time = erlang:system_time(), 
 		duration = Store,
 		samples = Store / Sample,
@@ -142,7 +143,7 @@ update(Key,Stat = [N|T],Event) ->
 		_ -> Stat
 	end.
 
-notify(#mesgd_stats{ samples = Samples, duration = Duration, domain = Domain, 
+notify(#mesgd_stats{ master = Master, samples = Samples, duration = Duration, domain = Domain, 
 	http_in = HttpIn, http_out = HttpOut, data_in = DataIn, data_out = DataOut, msgs_in = MsgsIn, msgs_out = MsgsOut,
 	auth_ack = AuthAck, auth_nak = AuthNack }) ->
 	Message = [
@@ -167,7 +168,7 @@ notify(#mesgd_stats{ samples = Samples, duration = Duration, domain = Domain,
 		{ auth_ack_ps, persec(AuthAck,Duration) },
 		{ auth_nak_ps, persec(AuthNack,Duration) }
 	],
-	mesgd_master:log(Message).
+	rpc:call(Master,mesgd_master,log,[Message]).
 
 install(Nodes) ->
 	{ atomic, ok } = mnesia:create_table(mesgd_stats, [
