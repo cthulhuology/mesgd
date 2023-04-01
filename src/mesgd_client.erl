@@ -21,10 +21,10 @@ start_link(Socket,Domain) ->
 init([ Listen, Domain ]) ->
 	case ssl:transport_accept(Listen) of
 		{ ok, Socket } ->
-			case ssl:ssl_accept(Socket,1000) of
-				ok ->
+			case ssl:handshake(Socket,1000) of
+				{ ok , SSLSocket } ->
 					{ ok, #mesgd_client{
-						socket = Socket,
+						socket = SSLSocket,
 						domain = Domain,
 						request = #request{ socket = Socket }
 					}};

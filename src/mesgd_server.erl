@@ -2,21 +2,24 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2016 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/2, stop/1, accept/1 ]).
+-export([ start_link/5, stop/1, accept/1 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
 -define(SELF, list_to_atom(?MODULE_STRING ++ "_" ++ integer_to_list(Port))).
--record(mesgd_server, { port, socket, domain, router }).
+-record(mesgd_server, { port, socket, domain, router, cacert, cert, key }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
-start_link(Port,Domain) ->
+start_link(Port,Domain,CACert, Cert, Key) ->
 	gen_server:start_link({ local, ?SELF }, ?MODULE, #mesgd_server{
 		port = Port,
-		domain = Domain
+		domain = Domain,
+		cacert = CACert,
+		cert = Cert,
+		key = Key
 	}, []).
 
 stop(Port) ->
@@ -30,11 +33,7 @@ accept(Port) ->
 % Private API
 %
 
-init(Server = #mesgd_server{ port = Port }) ->
-	Directory = mesgd_path:priv(),
-	CACert = Directory ++ "/cacert.pem",
-	Cert = Directory ++ "/cert.pem",
-	Key = Directory ++ "/key.pem",
+init(Server = #mesgd_server{ port = Port, cacert = CACert, cert = Cert, key = Key }) ->
 	error_logger:info_msg("Starting mesgd server on port ~p~n", [ Port ]),
 	case ssl:listen(Port,[
 		binary, 
@@ -45,8 +44,6 @@ init(Server = #mesgd_server{ port = Port }) ->
 		{reuseaddr, true},
 		{verify, verify_none}, 
 		{fail_if_no_peer_cert, false}
-	%	{versions,['tlsv1.2']},
-	%	{ciphers,[{rsa,aes_128_cbc,sha}]}
 	]) of
 		{ ok, Socket } ->
 			accept(Port),

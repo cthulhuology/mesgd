@@ -1,9 +1,8 @@
 -module(mesgd_auth).
 -author({ "David J Goehrig", "dave@dloh.org" }).
--copyright(<<"© 2017 David J Goehrig, Open Robotics Company LLC."/utf8>>).
+-copyright(<<"© 2017,2023 David J Goehrig"/utf8>>).
 -export([ install/1, auth/2, grant/3, revoke/3, token/2, tokenize/2, test/4, authorization/1 ]).
 
--include("include/mesgd_http.hrl").
 -include("include/mesgd_auth.hrl").
 -include("include/mesgd_user.hrl").
 
@@ -37,7 +36,7 @@ tokenize(Domain,Auth) ->
 	error_logger:info_msg("testing token ~p~n", [ Auth ]),
 	Key = <<Domain/binary, Auth/binary>>,
 	error_logger:info_msg("using key ~p~n", [ Key ]),
-	crypto:hmac(sha256,Salt,Key).
+	crypto:mac(hmac,sha256,Salt,Key).
 
 auth(Domain,Request = #request{ path = Path, headers = Headers }) ->
 	error_logger:info_msg("~p authenticating ~p~n", [ Domain, Request ]),	

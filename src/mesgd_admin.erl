@@ -14,10 +14,10 @@ start_link() ->
 	gen_server:start_link(?MODULE,[],[]).
 
 init([]) ->
-	mesgd_http_router:mount(<<"admin">>,mesgd_user_api:init()),
-	mesgd_http_router:mount(<<"admin">>,mesgd_auth_api:init()),
-	mesgd_http_router:mount(<<"admin">>,mesgd_path_api:init()),
-	mesgd_http_router:mount(<<"admin">>,mesgd_cluster_api:init()),
+	mesgd_router:mount(<<"admin">>,mesgd_user_api:init()),
+	mesgd_router:mount(<<"admin">>,mesgd_auth_api:init()),
+	mesgd_router:mount(<<"admin">>,mesgd_path_api:init()),
+	mesgd_router:mount(<<"admin">>,mesgd_cluster_api:init()),
 	{ ok, #mesgd_api{ } }.
 
 handle_call(Message,_From,State) ->

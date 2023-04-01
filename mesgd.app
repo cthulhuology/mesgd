@@ -1,5 +1,5 @@
 {application, mesgd, [
-	{description, "Open Robotics Company WebSocket Server"},
+	{description, "mesgd"},
 	{vsn, "1"},
 	{registered, []},
 	{applications, [
@@ -14,6 +14,7 @@
 		mesgd,
 		mesgd_app,
 		mesgd_sup,
+		mesgd_jwt,
 		mesgd_auth,
 		mesgd_router,
 		mesgd_logger,
@@ -23,15 +24,10 @@
 	]},
 	{mod, { mesgd_app, []}},
 	{env, [
-		{ port, 4433 },
-		{ admin_port, 4444 },
-		{ cluster, [ mesgd@localhost ]},
-		{ tables, [ mesgd_auth, mesgd_user ]},
-		{ table_timeout, 20000 },
+		{ port, 443 },
 		{ salt, <<"thisisareallyterriblesaltdon'tuse">> },
-		{ cacertfile, "priv/cacert.pem" },
-		{ certfile, "priv/cert.pem" },
-		{ keyfile, "priv/key.pem" }
-
+		{ cacertfile, "cacert.pem" },
+		{ certfile, "cert.pem" },
+		{ keyfile, "key.pem" }
 	]}
 ]}.

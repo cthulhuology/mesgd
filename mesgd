@@ -10,7 +10,7 @@
 connect(Server) ->
 	net_kernel:start([ list_to_atom("cmd" ++ integer_to_list(erlang:system_time()) ++ "@localhost"), shortnames ]),
 	set_cookie(),
-	case net_kernel:connect(Server) of
+	case net_kernel:connect_node(Server) of
 		false -> 
 			io:format("Failed to connect to ~p~n", [ Server ]),
 			erlang:halt(0);
@@ -47,9 +47,9 @@ process(Server,["init"|Cluster]) ->
 	Nodes = [ Server | lists:delete(Server,[ list_to_atom(X) || X <- Cluster ])],
 	process_flag(trap_exit,true),
 	io:format("Connecting to ~p~n", [ Nodes ]),
-	[ net_kernel:connect(Node) || Node <- Nodes ],
-	rpc:multicall(Nodes, application,load,[mesgd]),
-	rpc:multicall([Server], mesgd_database,initialize, [Nodes]),
+	[ net_kernel:connect_node(Node) || Node <- Nodes ],
+	io:format("~p~n",rpc:multicall(Nodes, application,load,[mesgd])),
+	io:format("~p~n",rpc:multicall([Server], mesgd_database,initialize, [Nodes])),
 	green(ok),
 	eol();
 
@@ -332,5 +332,7 @@ main(Args) ->
 	io:format("running ~p~n", [ Script] ),
 	io:format("Directory ~p~n", [ filename:dirname(Script) ]),
 	true = code:add_pathz(filename:dirname(escript:script_name()) ++ "/ebin"),
+	io:format("Got args ~p~n", [ Args ]),
 	{ Host, Args2 } = find_server(Args),
+	io:format("Found host ~p~n", [ Host ]),
 	process(Host,Args2).

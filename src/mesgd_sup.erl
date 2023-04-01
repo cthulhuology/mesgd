@@ -12,28 +12,12 @@ start_link() ->
 
 init([]) ->
 	{ ok, Port} = application:get_env(mesgd,port),
-	{ ok, AdminPort } = application:get_env(mesgd,admin_port),
-	{ ok, Nodes } = application:get_env(mesgd,cluster),
-	{ ok, Master } = application:get_env(mesgd,master),
-	{ ok, Sample } = application:get_env(mesgd,sample_rate),
-	{ ok, Store } = application:get_env(mesgd,store_rate),
+	{ ok, CACert } = application:get_env(mesgd,cacertfile),
+	{ ok, Cert } = application:get_env(mesgd,certfile),
+	{ ok, Key } = application:get_env(mesgd,keyfile),
+	{ ok,PublicKeyFile } = application:get_env(mesgd,publickey),
+	{ ok, PrivateKeyFile } = application:get_env(mesgd,privatekey),
 	{ok, { {one_for_one, 5, 10}, [
-		#{ id => mesgd_cluster,
-		start => { mesgd_cluster, start_link, [Nodes]},
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_cluster
-		]},
-		#{ id => mesgd_database,
-		start => { mesgd_database, start_link, [ Nodes ]},
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_database
-		]},
 		#{ id => mesgd_websocket_sup,
 		start => { mesgd_websocket_sup, start_link, []},
 		restart => permanent,
@@ -50,34 +34,9 @@ init([]) ->
 		modules => [ 
 			mesgd_router
 		]},
-		#{ id => ?MESGD_HTTP_ROUTER("localhost"),
-		start => { mesgd_http_router, start_link, [<<"localhost">>]},
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_http_router
-		]},
-		#{ id => ?MESGD_HTTP_ROUTER("admin"),
-		start => { mesgd_http_router, start_link, [<<"admin">>]},
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_http_router
-		]},
-		#{ id => mesgd_admin,
-		start => { mesgd_admin, start_link, []},
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_admin,
-			mesgd_http_router
-		]},
 		#{ id => ?MESGD_SERVER(Port),
 		start => { mesgd_server, start_link, [ 
-			Port, <<"localhost">> ]},
+			Port, <<"localhost">>, CACert, Cert, Key ]},
 		restart => permanent,
 		shutdown => brutal_kill,
 		type => worker,
@@ -86,32 +45,10 @@ init([]) ->
 			mesgd_server,
 			mesgd
 		]},
-		#{ id => ?MESGD_SERVER(AdminPort),
-		start => { mesgd_server, start_link, [
-			AdminPort, <<"admin">> ]},
+		#{ id => mesgd_jwt,
+		start => { mesgd_start, start_link, [ PublicKeyFile, PrivateKeyFile ]},
 		restart => permanent,
 		shutdown => brutal_kill,
 		type => worker,
-		modules => [ 
-			mesgd_admin_http_router,
-			mesgd_server,
-			mesgd
-		]},
-		#{ id => mesgd_startup,
-		start => { mesgd_startup, start, [ Master ]},
-		restart => transient,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_startup,
-			mesgd_master
-		]},
-		#{ id => mesgd_stats,
-		start => { mesgd_stats, start_link, [ Master, Sample, Store ] },
-		restart => permanent,
-		shutdown => brutal_kill,
-		type => worker,
-		modules => [
-			mesgd_stats
-		]}
+		modules => [ jwt ]}
 	]}}.
