@@ -1,1 +1,20 @@
-Up to date information about this project can be found at http://mesgd.org/
+mesgd - an all purpose swissarmy chainsaw
+----------------------------------------
+
+The primary goal of mesgd is to be the world's best server for connecting applications together.
+
+Getting Started
+===============
+
+To get started, you'll need beamer, https://github.com/cthulhuology/beamer.git 
+It is a tool that I use to make my life in Erlang a little less painful (cause rebar3 and mix suck)
+Once you have it installed, you can type:
+
+	make
+
+And beamer will checkout all the dependencies in the "deps" file, and will install the beams
+in your $HOME/.beamer directory. From there everything is just kinda automatic for the people.
+
+	./mesgd 
+
+To run.

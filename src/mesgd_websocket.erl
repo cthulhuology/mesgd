@@ -88,12 +88,21 @@ handle_cast( stop, WebSocket ) ->
 
 handle_cast({ message, Data }, WebSocket = #websocket{ path = Path, protocol = Protocol }) ->	
 	error_logger:info_msg("~p (~p) : ~p~n", [ Path, Protocol, Data ]),
-	mesgd_stats:record([{ data_in, byte_size(Data)},{ msgs_in, 1}]),
 	case Protocol of
 		<<"ujson">> -> mesgd_router:route( ujson:decode(Data) );
 		<<"json">> -> mesgd_router:route( json:decode(Data) );
 		_ -> mesgd_router:route( [ { data, Data } ] )
 	end,
+	{ noreply, WebSocket#websocket{ data = [] }};
+
+handle_cast({ ujson, Data }, WebSocket = #websocket{ path = Path, protocol = Protocol }) ->
+	error_logger:info_msg("ujson ~p (~p) : ~p~n", [ Path, Protocol, Data ]),
+	mesgd_router:route( ujson:decode(Data)),
+	{ noreply, WebSocket#websocket{ data = [] }};
+	
+handle_cast({ json, Data }, WebSocket = #websocket{ path = Path, protocol = Protocol }) ->
+	error_logger:info_msg("json ~p (~p) : ~p~n", [ Path, Protocol, Data ]),
+	mesgd_router:route( json:decode(Data)),
 	{ noreply, WebSocket#websocket{ data = [] }};
 
 handle_cast({ send, Message }, WebSocket = #websocket { socket = Socket, protocol = Protocol }) ->
@@ -320,8 +329,8 @@ dispatch(Opcode, Data ) ->
 	Payload = iolist_to_binary(lists:reverse(Data)),
 	case Opcode of
 		0 -> gen_server:cast(self(),{ message, Payload });	%% continuation
-		1 -> gen_server:cast(self(),{ message, Payload });	%% text
-		2 -> gen_server:cast(self(),{ message, Payload });	%% binary
+		1 -> gen_server:cast(self(),{ json, Payload });		%% text
+		2 -> gen_server:cast(self(),{ ujson , Payload });	%% binary
 		8 -> gen_server:cast(self(),close);		 	%% close
 		9 -> gen_server:cast(self(),ping);			%% ping
 		10 -> gen_server:cast(self(),pong);			%% pong
