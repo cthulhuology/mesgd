@@ -1,0 +1,4 @@
+{ ujson, "https://github.com/cthulhuology/ujson.git"}.
+{ json, "https://github.com/cthulhuology/json.git" }.
+{ uuid, "https://github.com/cthulhuology/uuid.git" }.
+{ jwt, "https://github.com/cthulhuology/jwt.git" }.
