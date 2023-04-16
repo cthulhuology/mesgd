@@ -34,8 +34,10 @@ route(<<>>) ->
 	error_logger:info_msg("Attempt to route empty message~n"),
 	ok;
 route(Data) ->
-	error_logger:info_msg("Routing ~p~n", Data ),
-	gen_server:abcast(mesgd_cluster:nodes(), ?MODULE, { route, Data }).
+	Nodes = mesgd_cluster:nodes(),
+	error_logger:info_msg("Routing ~p to ~p~n", [Data,Nodes] ),
+	gen_server:abcast(Nodes, ?MODULE, { route, Data }),
+	gen_server:cast(?MODULE,{route,Data}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Private API

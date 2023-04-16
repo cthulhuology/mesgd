@@ -1,45 +1,47 @@
 -module(mesgd_jwt).
 -author({ "David J Goehrig", "dave@dloh.org" }).
--copyright(<<"© 2016 David J Goehrig"/utf8>>).
+-copyright(<<"© 2023 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/2, stop/0, grant/1, verify/1, revoke/1 ]).
+-export([ start_link/0, stop/0, grant/1, verify/1, revoke/1 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
 -record(mesgd_jwt, { public, private, revoked }).
-
--define(SELF,list_to_atom(?MODULE_STRING)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
 %% create a mesgd_jwt under supervision for the port
-start_link(PublicKeyFile,PrivateKeyFile) ->
+start_link() ->
+	{ ok, PublicKeyFile } = mesgd_config:get(public),
+	io:format("Loading public key ~p~n", [ PublicKeyFile ]),
+	{ ok, PrivateKeyFile } = mesgd_config:get(private),
+	io:format("Loading private key ~p~n", [ PrivateKeyFile ]),
 	{ ok, PublicKey } = file:read_file(PublicKeyFile),
 	{ ok, PrivateKey } = file:read_file(PrivateKeyFile),
-	gen_server:start_link({ local, ?SELF }, ?MODULE, #mesgd_jwt{
+	io:format("Loaded Keys~n"),
+	gen_server:start_link({ local, ?MODULE }, ?MODULE, #mesgd_jwt{
 		public = PublicKey,
 		private = PrivateKey,
 		revoked = []
-		
 	}, []).
 
 %% stop the mesgd_jwt server
 stop() ->
-	gen_server:call(?SELF,stop).
+	gen_server:call(?MODULE,stop).
 
 %% grant a set of claims (takes a JSON document)
 grant(Claims) ->
-	gen_server:call(?SELF,{ grant, Claims }).
+	gen_server:call(?MODULE,{ grant, Claims }).
 
 %% verifies a jwt token 
 verify(Token) ->
-	gen_server:call(?SELF,{ verify, Token }).
+	gen_server:call(?MODULE,{ verify, Token }).
 
 %% revoke a valid jwt token
 revoke(Token) ->
-	gen_server:cast(?SELF,{ revoke, Token }).
+	gen_server:cast(?MODULE,{ revoke, Token }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Private API

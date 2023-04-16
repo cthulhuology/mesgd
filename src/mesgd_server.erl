@@ -2,31 +2,33 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2016 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/5, stop/1, accept/1 ]).
+-export([ start_link/0, stop/0, accept/0 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
--define(SELF, list_to_atom(?MODULE_STRING ++ "_" ++ integer_to_list(Port))).
--record(mesgd_server, { port, socket, domain, router, cacert, cert, key }).
+-record(mesgd_server, { port, socket, router, cacert, cert, key }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
-start_link(Port,Domain,CACert, Cert, Key) ->
-	gen_server:start_link({ local, ?SELF }, ?MODULE, #mesgd_server{
+start_link() ->
+	{ ok, Port } = mesgd_config:get(port),
+	{ ok, CACert } = mesgd_config:get(cacert),
+	{ ok, Cert } = mesgd_config:get(cert),
+	{ ok, Key } = mesgd_config:get(key),
+	gen_server:start_link({ local, ?MODULE }, ?MODULE, #mesgd_server{
 		port = Port,
-		domain = Domain,
 		cacert = CACert,
 		cert = Cert,
 		key = Key
 	}, []).
 
-stop(Port) ->
-	gen_server:call(?SELF,stop).
+stop() ->
+	gen_server:call(?MODULE,stop).
 
-accept(Port) ->
-	gen_server:cast(?SELF,accept).
+accept() ->
+	gen_server:cast(?MODULE,accept).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,7 +48,7 @@ init(Server = #mesgd_server{ port = Port, cacert = CACert, cert = Cert, key = Ke
 		{fail_if_no_peer_cert, false}
 	]) of
 		{ ok, Socket } ->
-			accept(Port),
+			accept(),
 			{ ok, Server#mesgd_server{ socket = Socket }};
 		{ error, Reason } ->
 			error_logger:error_msg("Socket listen failed on ~p because: ~p", [ Port, Reason ]),
@@ -60,9 +62,9 @@ handle_call(Message,_From,Server) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
 	{ reply, ok, Server }.
 
-handle_cast(accept,Server = #mesgd_server{ socket = Socket, port = Port, domain = Domain }) ->
-	mesgd_client:start_link(Socket,Domain),
-	accept(Port),
+handle_cast(accept,Server = #mesgd_server{ socket = Socket }) ->
+	mesgd_client:start_link(Socket),
+	accept(),
 	{ noreply, Server };
 
 handle_cast(Message,Server) ->

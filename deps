@@ -2,3 +2,5 @@
 { json, "https://github.com/cthulhuology/json.git" }.
 { uuid, "https://github.com/cthulhuology/uuid.git" }.
 { jwt, "https://github.com/cthulhuology/jwt.git" }.
+{ worm, "https://github.com/cthulhuology/worm.git" }.
+{ bitvector, "https://github.com/cthulhuology/bitvector.git" }.

@@ -11,7 +11,7 @@
 nodes() ->
 	gen_server:call(?MODULE,nodes).
 
-init([Nodes]) ->
+init(Nodes) ->
 	error_logger:info_msg("Cluster with nodes: ~p~n", [ Nodes ]),
 	{ ok, #mesgd_cluster{ nodes = Nodes } }. 
 
@@ -22,8 +22,7 @@ remove(Node) ->
 	gen_server:call(?MODULE,{ remove, Node }).
 
 start_link(Nodes) ->
-	gen_server:start_link({ local,?MODULE },
-		?MODULE,[Nodes],[]).
+	gen_server:start_link({ local,?MODULE }, ?MODULE,Nodes,[]).
 
 stop() ->
 	gen_server:call(?MODULE,stop).

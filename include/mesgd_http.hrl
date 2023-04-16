@@ -6,6 +6,7 @@
 	data = <<>>,
 	method, path, protocol,
 	headers = [],
+	claims = [],
 	body = <<>>
 }).
 
@@ -15,6 +16,7 @@
 	status = 200,
 	protocol = <<"HTTP/1.1">>,
 	headers = [],
+	claims = [],
 	body = <<>>
 }).
 

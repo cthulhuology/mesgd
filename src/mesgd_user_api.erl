@@ -11,11 +11,11 @@ init() ->
 
 get(#request{ path = Path, headers = _Headers, body = _Body }) ->
 	case string:tokens(Path,"/") of
-		[ "user", Domain ] ->
+		[ "user" ] ->
 			error_logger:info_msg("Looking up all users"),
-			json:encode(mesgd_user:users(Domain));
-		[ "user", Domain, Name ] ->
-			User = mesgd_user:user(Domain,Name),
+			json:encode(mesgd_user:users());
+		[ "user", Name ] ->
+			User = mesgd_user:user(Name),
 			json:encode(User);
 		_ -> 	
 			json:encode([])
@@ -29,11 +29,10 @@ put(#request{ path = Path, headers = _Headers, body = Body }) ->
 			UserName = proplists:get_value(<<"name">>,User),
 			Email = proplists:get_value(<<"email">>,User),
 			Password = proplists:get_value(<<"password">>,User),
-			Domain = proplists:get_value(<<"domain">>,User),
 			Paths = proplists:get_value(<<"paths">>, User),
-			ok = mesgd_user:add(Domain,Name,Email,Password),
-			[ mesgd_auth:grant(Domain,Name,P) || P <- Paths ],
-			json:encode(mesgd_user:user(Domain,Name));
+			ok = mesgd_user:add(Name,Email,Password),
+			[ mesgd_auth:grant(Name,P) || P <- Paths ],
+			json:encode(mesgd_user:user(Name));
 		_ -> 
 			json:encode([])
 	end.

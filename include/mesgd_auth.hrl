@@ -1,2 +1,2 @@
 %% mesgd_auth.hrl
--record(mesgd_auth, { token, domain, user, email, active, paths = [] }).
+-record(mesgd_auth, { token, user, email, active, paths = [] }).

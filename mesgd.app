@@ -20,14 +20,10 @@
 		mesgd_logger,
 		mesgd_static,
 		mesgd_dynamic,
-		mesgd_server
+		mesgd_server,
+		ujson,
+		jwt
 	]},
 	{mod, { mesgd_app, []}},
-	{env, [
-		{ port, 443 },
-		{ salt, <<"thisisareallyterriblesaltdon'tuse">> },
-		{ cacertfile, "cacert.pem" },
-		{ certfile, "cert.pem" },
-		{ keyfile, "key.pem" }
-	]}
+	{env, []}
 ]}.

@@ -8,8 +8,7 @@
 priv() ->
 	case code:priv_dir(mesgd) of
 		{ error,bad_name } ->
-			{ ok, Dir} = application:get_env(mesgd,path),
-			Dir;
+			".";
 		Dir ->
 			Dir
 	end.
