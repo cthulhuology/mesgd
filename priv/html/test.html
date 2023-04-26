@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>orc</title>
+</head>
+<body>
+<script>
+var ws = new WebSocket('wss://dave:test@localhost:4433/chat','json')
+ws.onmessage = function(message) {
+	console.log(message.data)
+}
+ws.onerror = function(err) {
+	console.error(err)
+}
+</script>
+</body>
+</html>
