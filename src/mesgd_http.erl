@@ -66,7 +66,7 @@ request(Http = #request{ stage = _ }, NewData) ->
 
 response(#response{ status = Code, headers = Headers, body = Body}) ->
 	Reason = status(Code),
-	error_logger:info_msg("Headers ~p~", [ Headers ]),
+	error_logger:info_msg("Headers ~p~n", [ Headers ]),
 	Header = lists:foldr(fun({K,V},B) -> 
 		<< K/binary, ": ", V/binary, "\r\n", B/binary >> 
 	end, <<>>, Headers),
