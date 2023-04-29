@@ -6,7 +6,6 @@
 		kernel,
 		stdlib,
 		crypto,
-		asn1,
 		public_key,
 		ssl
 	]},

@@ -36,8 +36,11 @@ grant(Claims) ->
 	gen_server:call(?MODULE,{ grant, Claims }).
 
 %% verifies a jwt token 
-verify(Token) ->
-	gen_server:call(?MODULE,{ verify, Token }).
+verify(Token) when is_binary(Token) ->
+	gen_server:call(?MODULE,{ verify, Token });
+
+verify(Token) when is_list(Token) ->
+	gen_server:call(?MODULE,{ verify, list_to_binary(Token) }).
 
 %% revoke a valid jwt token
 revoke(Token) ->
@@ -54,13 +57,16 @@ init(Jwt = #mesgd_jwt{} ) ->
 	{ ok, Jwt }.	
 
 handle_call({ grant, Claims },_From, Jwt = #mesgd_jwt{ private = Private }) ->
+	io:format("Signing claims ~p~n", [ Claims ]),
 	Token = jwt:sign(Claims, Private),
+	io:format("Got token ~p~n", [ Token ]),
 	{ reply, {ok, Token}, Jwt };
 
 handle_call({ verify, Token },_From, Jwt = #mesgd_jwt{ public = Public, revoked = Revoked }) ->
 	case is_revoked(Token,Revoked) of
 		true -> { reply, failed, Jwt };
 		_ ->
+			io:format("validating ~p~n", [ Token ]),
 			case jwt:claims(Token,Public) of
 				invalid -> { reply, failed, Jwt };
 				Claims -> { reply, { ok, Claims} , Jwt }

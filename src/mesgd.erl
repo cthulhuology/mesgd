@@ -9,7 +9,8 @@
 
 %% create a mesgd_server under supervision for the port
 start() ->
-	application:ensure_all_started(mesgd).
+	application:ensure_all_started(mesgd),
+	net_kernel:start([mesgd@localhost,shortnames]).
 
 stop() ->
 	application:stop(mesgd).

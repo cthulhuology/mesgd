@@ -84,7 +84,6 @@ process(_Server,["start","help"]) ->
 mesgd [node] start ]
 	
 	The start command will start a mesgd application on the given node.
-	Epmd must be running on the host already for this command to work.
 	Instructions for setting up epmd on boot can be found in the README.
 
 ");	
@@ -92,6 +91,7 @@ mesgd [node] start ]
 process(mesgd@localhost,["start"]) ->
 	application:load(mesgd),
 	mesgd:start(),
+	set_cookie(),
 	loop();
 
 process(Server,["start"]) ->
@@ -122,6 +122,32 @@ process(Server,["stop"]) ->
 			red(fail),
 			eol()
 	end;
+
+process(Server,["forge" | Claims]) ->
+	case connect(Server) of
+		ok ->
+			Token = rpc:call(Server, mesgd_auth, forge, [ lists:map( fun(X) -> list_to_binary(X) end, Claims)] ),
+			io:format("~p~n", [ Token ]),
+			green(ok),
+			eol();
+		fail ->
+			red(fail),
+			eol()	
+	end;
+
+process(Server,["check",Path,Token]) ->
+	case connect(Server) of
+		ok ->
+			case rpc:call(Server, mesgd_auth, check, [ Path, Token ]) of
+			invalid ->
+				red(invalid),
+				eol();
+			Claims  ->
+				io:format("~p~n", [ Claims ]),
+				green(ok),
+				eol()
+			end
+	end;
 		
 %% This needs to be the last state in the process funciton, as it
 %% is a catchall that prints out the status message.  If you are
@@ -145,10 +171,12 @@ usage: mesgd [node] [start|stop|status|console|observer]
 
 	observer 			- run the observer on a node
 
+	forge claims...			- create a JWT token
+
 ").
 
 set_cookie() ->
-	case application:get_env(mesgd,cookie) of
+	case mesgd_config:get(cookie) of
 		{ ok, Cookie } ->
 			erlang:set_cookie(node(),Cookie);
 		_ ->

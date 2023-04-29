@@ -20,11 +20,11 @@ start_link() ->
 response(Response = #response{}) ->
 	Response;
 
-response(Request = #request { method = Method, claims = Claims }) ->	
-	case mesgd_auth:check(Method,Claims) of
-	unauthorized ->
+response(Request = #request { method = Method, path = Path, claims = Claims }) ->	
+	case mesgd_auth:check(Path,Claims) of
+	invalid ->
 		#response{ status = 401 };
-	authorized ->
+	_ ->
 		Content = gen_server:call(?MODULE,{ Method, Request }),
 		ContentLength = binary:list_to_bin(integer_to_list(byte_size(Content))),
 		#response{ 
