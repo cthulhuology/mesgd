@@ -123,27 +123,45 @@ process(Server,["stop"]) ->
 			eol()
 	end;
 
+process(_Server,["forge","help"]) ->
+	io:format("
+mesgd [node] forge claims... 
+
+	The forge command takes a list of key value pairs to generate
+	a jwt token.  If an odd number of elements are passed the last
+	element will be set to true.  Returns fail on failure, or the JWT.
+
+");
+
+
 process(Server,["forge" | Claims]) ->
 	case connect(Server) of
 		ok ->
 			Token = rpc:call(Server, mesgd_auth, forge, [ lists:map( fun(X) -> list_to_binary(X) end, Claims)] ),
-			io:format("~p~n", [ Token ]),
-			green(ok),
+			io:format("~s~n", [ Token ]),
 			eol();
 		fail ->
 			red(fail),
 			eol()	
 	end;
 
+process(_Server,["check","help"]) ->
+	io:format("
+mesgd [node] check path token
+
+	The check command will attempt to verify that the given jwt token
+	works the given path.  Returns ok or fail based on the check result.
+
+");
+
 process(Server,["check",Path,Token]) ->
 	case connect(Server) of
 		ok ->
 			case rpc:call(Server, mesgd_auth, check, [ Path, Token ]) of
 			invalid ->
-				red(invalid),
+				red(fail),
 				eol();
-			Claims  ->
-				io:format("~p~n", [ Claims ]),
+			_  ->
 				green(ok),
 				eol()
 			end
@@ -155,7 +173,7 @@ process(Server,["check",Path,Token]) ->
 %% to reflect the new usage.
 process(_Server,_) ->
 	io:format("
-usage: mesgd [node] [start|stop|status|console|observer]
+usage: mesgd [node] [start|stop|status|console|observer|forge|check]
 
 	help 				- this message
 
@@ -172,6 +190,8 @@ usage: mesgd [node] [start|stop|status|console|observer]
 	observer 			- run the observer on a node
 
 	forge claims...			- create a JWT token
+
+	check path token		- validate a token for a given path
 
 ").
 
@@ -216,11 +236,5 @@ main(Args) ->
 	{ok, [[Home]]} = init:get_argument(home),
 	code:add_patha(Home ++ "/.beamer"),
 	code:load_file(beamer),
-	%% always start a temporary node that we can discard
-	Script = escript:script_name(),
-	io:format("running ~p~n", [ Script] ),
-	io:format("Directory ~p~n", [ filename:dirname(Script) ]),
-	io:format("Got args ~p~n", [ Args ]),
 	{ Host, Args2 } = find_server(Args),
-	io:format("Found host ~p~n", [ Host ]),
 	process(Host,Args2).
