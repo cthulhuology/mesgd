@@ -20,6 +20,23 @@ start_link() ->
 response(Response = #response{}) ->
 	Response;
 
+%% I no claims are passed, don't check
+response(Request = #request { method = Method, claims = [] }) ->	
+	Content = gen_server:call(?MODULE,{ Method, Request }),
+		ContentLength = binary:list_to_bin(integer_to_list(byte_size(Content))),
+		#response{ 
+			socket = Request#request.socket,
+			upgrade = false,
+			status = 200,
+			protocol = <<"HTTP/1.1">>,
+			headers = [
+				{ <<"Content-Length">>, ContentLength },
+				{ <<"Content-Type">>, <<"text/html">> }
+			],
+			body = Content,
+			claims = []
+		};
+
 response(Request = #request { method = Method, path = Path, claims = Claims }) ->	
 	case mesgd_auth:check(Path,Claims) of
 	invalid ->

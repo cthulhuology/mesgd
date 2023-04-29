@@ -5,7 +5,7 @@
 </head>
 <body>
 <script>
-var ws = new WebSocket('wss://dave:test@localhost:4433/chat','json')
+var ws = new WebSocket('wss://dave:eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjaGF0Ijp0cnVlLCJ1aWQiOiIxMjMifQ.LsC6069znt5HiO-oLKSEM-2Mo_8nL8nM0nBIUdGpCfCYjq5Tse4HFMgNbbJ0dbkqX45w14toi5dcisjVfDaF9L-UVDBALVXg-BfUBRVJY7WIbE0rIujxznilwx6iSCA7UVj18v8wdbf-ALVtqFdt2ITaMmcjFAdbCyzhp5a6xBF-il2ERbk7BTVOU8Hv82MtQ8GxiC8l4t7R2iPo1VB6_UwvKd5PgL16_wfLAFS_mgBhPhGnxaxKgzpJ8m9CO9iZMofk2YUeix7DbUVJ-PgO6_TSTuTwwqCoaXl-XvEj33xp8yKaukMDIGRKQw5RTfQ_hMPZN93Vzmh4zS0CGn33fw@localhost:4433/chat/uid=123','json')
 ws.onmessage = function(message) {
 	console.log(message.data)
 }
