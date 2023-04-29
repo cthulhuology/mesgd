@@ -15,12 +15,9 @@
 %% create a mesgd_jwt under supervision for the port
 start_link() ->
 	{ ok, PublicKeyFile } = mesgd_config:get(public),
-	io:format("Loading public key ~p~n", [ PublicKeyFile ]),
 	{ ok, PrivateKeyFile } = mesgd_config:get(private),
-	io:format("Loading private key ~p~n", [ PrivateKeyFile ]),
 	{ ok, PublicKey } = file:read_file(PublicKeyFile),
 	{ ok, PrivateKey } = file:read_file(PrivateKeyFile),
-	io:format("Loaded Keys~n"),
 	gen_server:start_link({ local, ?MODULE }, ?MODULE, #mesgd_jwt{
 		public = PublicKey,
 		private = PrivateKey,
@@ -57,16 +54,13 @@ init(Jwt = #mesgd_jwt{} ) ->
 	{ ok, Jwt }.	
 
 handle_call({ grant, Claims },_From, Jwt = #mesgd_jwt{ private = Private }) ->
-	io:format("Signing claims ~p~n", [ Claims ]),
 	Token = jwt:sign(Claims, Private),
-	io:format("Got token ~p~n", [ Token ]),
 	{ reply, {ok, Token}, Jwt };
 
 handle_call({ verify, Token },_From, Jwt = #mesgd_jwt{ public = Public, revoked = Revoked }) ->
 	case is_revoked(Token,Revoked) of
 		true -> { reply, failed, Jwt };
 		_ ->
-			io:format("validating ~p~n", [ Token ]),
 			case jwt:claims(Token,Public) of
 				invalid -> { reply, failed, Jwt };
 				Claims -> { reply, { ok, Claims} , Jwt }

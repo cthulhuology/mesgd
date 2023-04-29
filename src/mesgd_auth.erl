@@ -37,20 +37,16 @@ handle_call({ auth, #request{ path = Path, headers = Headers } }, _From, State )
 		undefined  ->	
 			{ reply, [], State };	%% no auth and no websocket
 		<<"json, ", Token/binary>> ->
-			io:format("Found Token ~p~n", [ Token ]),
 			Auth = validate(Path,Token),
 			{ reply, Auth, State };
 		<<"ujson, ", Token/binary>> ->
-			io:format("Found Token ~p~n", [ Token ]),
 			Auth = validate(Path,Token),
 			{ reply, Auth, State }
 		end;
 	<<"Bearer ",Token/binary>> ->
-		io:format("got token ~p~n", [ Token ]),
 		Auth = validate(Path,Token),
 		{ reply, Auth, State };	
 	<<"Basic ",Pword/binary>> -> 
-		io:format("got password ~p~n", [ Pword ]),
 		Token = base64:decode(Pword),	
 		Auth = validate(Path,Token),
 		{ reply, Auth, State }
@@ -83,13 +79,10 @@ validate(Path,Token) ->
 	case mesgd_jwt:verify(Token) of
 		invalid -> invalid;
 		{ ok, Claims} ->
-			io:format("Found claims ~p comparing with path ~p~n", [ Claims, Path ]),
 			case mesgd_path:match(Claims,Path) of
 			true ->
-				io:format("Path matches claims"),
 				Claims;
 			_ ->
-				io:format("Path does not match claims"),
 				invalid
 			end
 	end.
