@@ -89,14 +89,16 @@ handle_request(Request = #request{ headers = Headers, socket = Socket }, #mesgd_
 	Response = case mesgd_auth:auth(Request) of
 		invalid -> 
 			#response{ status =  401 };
-		{ ok, Claims } ->
+		Claims ->
 			case mesgd_websocket:upgrade(Headers) of
 				true ->	
+					io:format("Authorized Websocket connecton for ~p~n", [ Claims ]),
 					mesgd_websocket:response(Request#request{ claims = Claims });
 				_ ->
 					mesgd_http_router:response(Request#request{ claims = Claims })
 			end
 	end,
 	Bin = mesgd_http:response(Response),
+	io:format("Writing ~p~n", [ Bin ]),
 	mesgd_stats:record([{ data_out, byte_size(Bin) }, { http_out, 1 }]),
 	ssl:send(Socket,Bin).

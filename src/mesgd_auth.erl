@@ -33,7 +33,18 @@ handle_call({ check, Path, Token }, _From, State ) ->
 handle_call({ auth, #request{ path = Path, headers = Headers } }, _From, State ) ->
 	case proplists:get_value(<<"Authorization">>,Headers) of
 	undefined ->
-		{ reply, {ok, []}, State };
+		case proplists:get_value(<<"Sec-WebSocket-Protocol">>,Headers) of
+		undefined  ->	
+			{ reply, [], State };	%% no auth and no websocket
+		<<"json, ", Token/binary>> ->
+			io:format("Found Token ~p~n", [ Token ]),
+			Auth = validate(Path,Token),
+			{ reply, Auth, State };
+		<<"ujson, ", Token/binary>> ->
+			io:format("Found Token ~p~n", [ Token ]),
+			Auth = validate(Path,Token),
+			{ reply, Auth, State }
+		end;
 	<<"Bearer ",Token/binary>> ->
 		io:format("got token ~p~n", [ Token ]),
 		Auth = validate(Path,Token),

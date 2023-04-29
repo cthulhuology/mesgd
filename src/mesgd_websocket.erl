@@ -65,7 +65,7 @@ message(Socket,Data) ->
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% gen_server methods
-init(Request = #request{ socket = Socket, path = Path, headers = Headers, body = Data }) ->
+init(Request = #request{ socket = Socket, path = Path, headers = _Headers, body = Data }) ->
 %%	{ PeerIP, PeerPort } = inet:peername(Socket),
 %%	error_logger:info_msg("Websocket started on ~p, from ~p:~p", [ Path, PeerIP, PeerPort ]),
 	ok = ssl:controlling_process(Socket,self()),
@@ -76,7 +76,7 @@ init(Request = #request{ socket = Socket, path = Path, headers = Headers, body =
 		socket = Socket, 
 		request = Request,
 		path = Path,
-		protocol = proplists:get_value(<<"Sec-WebSocket-Protocol">>,Headers),
+		protocol = <<"json">>, %% proplists:get_value(<<"Sec-WebSocket-Protocol">>,Headers),
 		state = { wait, Data, [] }}}.
 
 handle_call(Message,_From,WebSocket) ->
@@ -183,10 +183,10 @@ frame(Data,Opcode,Masked) when is_binary(Data) ->
 
 %% Calcuate an rfc6455 handshake
 handshake(Headers) ->
-	Proto = case proplists:get_value(<<"Sec-WebSocket-Protocol">>,Headers) of
-		undefined -> <<"binary">>;
-		Any -> Any
-	end,
+	%%Proto = case proplists:get_value(<<"Sec-WebSocket-Protocol">>,Headers) of
+	%%	undefined -> <<"binary">>;
+	%%	Any -> Any
+	%%end,
 	Key = proplists:get_value(<<"Sec-WebSocket-Key">>,Headers),
 	Shake = <<Key/binary,"258EAFA5-E914-47DA-95CA-C5AB0DC85B11">>, %% 25.. is magic
 	Crypt = crypto:hash(sha,Shake),
@@ -197,7 +197,7 @@ handshake(Headers) ->
 			{ <<"Upgrade">>, <<"websocket">> },
 			{ <<"Connection">>, <<"Upgrade">> },
 			{ <<"Sec-WebSocket-Accept">>, Secret },
-			{ <<"Sec-WebSocket-Protocol">>, Proto }
+			{ <<"Sec-WebSocket-Protocol">>, <<"json">> }
 		]
 	}.
 
