@@ -1,0 +1,3 @@
+{ ok, [[Home]]} = init:get_argument(home).	
+code:add_patha(Home ++ "/.beamer").
+code:load_file(beamer).
