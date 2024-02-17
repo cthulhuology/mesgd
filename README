@@ -15,6 +15,7 @@ Once you have it installed, you can type:
 And beamer will checkout all the dependencies in the "deps" file, and will install the beams
 in your $HOME/.beamer directory. From there everything is just kinda automatic for the people.
 
+	epmd &
 	./mesgd 
 
 To run.
