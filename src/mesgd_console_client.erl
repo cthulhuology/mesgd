@@ -50,23 +50,12 @@ handle_info({ ssl, Socket, Data }, Client = #mesgd_console_client{ request = Req
 			%% need to grab the full request data
 			mesgd_stats:record([{console_data_in, byte_size(Req#request.data)}, { console_http_in, 1}]),
 			Response = mesgd_console_router:response(Request),
-			error_logger:info_msg("Responding ~p with ~p", [ Request, Response ]),
 			Bin = mesgd_http:response(Response),
 			mesgd_stats:record([{ console_data_out, byte_size(Bin) }, { console_http_out, 1 }]),
 			ssl:send(Socket,Bin),
-			error_logger:info_msg("Sent data"),
-			case ssl:shutdown(Socket, read_write) of
-				ok -> 
-					error_logger:info_msg("shutdown socket"),
-					{ stop, normal, Client };
-				{ error, Reason } ->
-					error_logger:error_msg("Request for ~p failed: ~p", [ Request, Reason ]),
-					ssl:close(Socket),
-					{ stop, error, Client }
-			end;
+			{ stop, normal, Client };
 		_ ->
 			%% partial request wait
-			error_logger:info_msg("Waiting for more request data"),
 			{ noreply, Client#mesgd_console_client{ request = Request }}
 	end;
 
@@ -79,9 +68,7 @@ handle_info(Message,Client) ->
 	{ noreply, Client }.
 
 terminate(_Reason,#mesgd_console_client{ socket = Socket }) ->
-	error_logger:info_msg("terminating console client"),
-	ssl:close(Socket),
-	ok.
+	ssl:shutdown(Socket, read_write).
 
 code_change( _Old, Client, _Extra) ->
 	{ ok, Client }.

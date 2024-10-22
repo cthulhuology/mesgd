@@ -113,7 +113,6 @@ code_change(_Old,_Extra,Router) ->
 file(Path) ->
 	{ ok, ConsoleRoot } = mesgd_config:get(console_root),
 	Filename = ConsoleRoot ++ Path,
-	error_logger:info_msg("Looking for file ~p~n",[ Filename ]),
 	file:read_file(Filename).
 
 static_file(#request{ path = Path }) ->

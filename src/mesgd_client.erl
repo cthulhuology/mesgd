@@ -78,8 +78,7 @@ handle_info(Message,Client) ->
 	{ noreply, Client }.
 
 terminate(_Reason,#mesgd_client{ socket = Socket }) ->
-	ssl:close(Socket),
-	ok.
+	ssl:shutdown(Socket,read_write).
 
 code_change( _Old, Client, _Extra) ->
 	{ ok, Client }.
