@@ -22,27 +22,28 @@ response(Response = #response{}) ->
 
 %% I no claims are passed, don't check
 response(Request = #request { method = Method, claims = [] }) ->	
-	Content = gen_server:call(?MODULE,{ Method, Request }),
-		ContentLength = binary:list_to_bin(integer_to_list(byte_size(Content))),
-		#response{ 
-			socket = Request#request.socket,
-			upgrade = false,
-			status = 200,
-			protocol = <<"HTTP/1.1">>,
-			headers = [
-				{ <<"Content-Length">>, ContentLength },
-				{ <<"Content-Type">>, <<"text/html">> }
-			],
-			body = Content,
-			claims = []
-		};
+	{ Content, Type } = gen_server:call(?MODULE,{ Method, Request }),
+	ContentLength = binary:list_to_bin(integer_to_list(byte_size(Content))),
+	#response{ 
+		socket = Request#request.socket,
+		upgrade = false,
+		status = 200,
+		protocol = <<"HTTP/1.1">>,
+		headers = [
+			{ <<"Connection">>, <<"close">> },
+			{ <<"Content-Length">>, ContentLength },
+			{ <<"Content-Type">>, Type }
+		],
+		body = Content,
+		claims = []
+	};
 
 response(Request = #request { method = Method, path = Path, claims = Claims }) ->	
 	case mesgd_auth:check(Path,Claims) of
 	invalid ->
 		#response{ status = 401 };
 	_ ->
-		Content = gen_server:call(?MODULE,{ Method, Request }),
+		{ Content, Type } = gen_server:call(?MODULE,{ Method, Request }),
 		ContentLength = binary:list_to_bin(integer_to_list(byte_size(Content))),
 		#response{ 
 			socket = Request#request.socket,
@@ -50,8 +51,9 @@ response(Request = #request { method = Method, path = Path, claims = Claims }) -
 			status = 200,
 			protocol = <<"HTTP/1.1">>,
 			headers = [
+				{ <<"Connection">>, <<"close">> },
 				{ <<"Content-Length">>, ContentLength },
-				{ <<"Content-Type">>, <<"text/html">> }
+				{ <<"Content-Type">>, Type }
 			],
 			body = Content,
 			claims = Claims
@@ -76,7 +78,8 @@ init([]) ->
 handle_call({ Method, Request = #request{ method = Method, path = Path }}, _From, Router = #mesgd_console_router{ routes = Routes }) ->
 	case mesgd_path:path_scan(Path,Routes) of
 		undefined -> 
-			{ reply, static_file(Request), Router };
+			{ File, Type } = static_file(Request),
+			{ reply, { File, Type }, Router };
 		Module ->
 			{ reply, Module:Method(Request), Router }
 	end;	
@@ -116,9 +119,28 @@ file(Path) ->
 static_file(#request{ path = Path }) ->
 	case file(Path) of
 		{ ok, Bin } ->
-			Bin;
+			{ Bin, content_type(extension(Path)) };
+		{ error, eisdir } ->
+			static_file(#request{ path = Path ++ "index.html" });		%% try index.html if we're opening a dir
 		{ error, Error } ->
 			error_logger:info_msg("Returning empty response ~p~n", [ Error ]),
-			<<>>
+			{ <<>>, <<"text/plain">> }
 	end.
+
+content_type("html") -> <<"text/html">>;
+content_type("txt") -> <<"text/plain">>;
+content_type("js") -> <<"application/javascript">>;
+content_type("mjs") -> <<"application/javascript">>;
+content_type("cjs") -> <<"application/javascript">>;
+content_type("json") -> <<"application/json">>;
+content_type("gz") -> <<"application/gzip">>;
+content_type("zip") -> <<"application/zip">>;
+content_type("pdf") -> <<"application/pdf">>;
+content_type("png") -> <<"image/png">>;
+content_type("jpg") -> <<"image/jpg">>;
+content_type("svg") -> <<"image/svg+xml">>;
+content_type(_) -> <<"application/octet-stream">>.
+
+extension(Path) ->
+	lists:last(string:split(Path,".")).
 

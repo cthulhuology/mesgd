@@ -2,7 +2,7 @@
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2016 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/0, stop/0, accept/0 ]).
+-export([ start_link/0, stop/0 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
@@ -27,9 +27,6 @@ start_link() ->
 stop() ->
 	gen_server:call(?MODULE,stop).
 
-accept() ->
-	gen_server:cast(?MODULE,accept).
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Private API
@@ -48,7 +45,7 @@ init(Server = #mesgd_server{ port = Port, cacert = CACert, cert = Cert, key = Ke
 		{fail_if_no_peer_cert, false}
 	]) of
 		{ ok, Socket } ->
-			accept(),
+			gen_server:cast(?MODULE, listen),
 			{ ok, Server#mesgd_server{ socket = Socket }};
 		{ error, Reason } ->
 			error_logger:error_msg("Socket listen failed on ~p because: ~p", [ Port, Reason ]),
@@ -56,16 +53,22 @@ init(Server = #mesgd_server{ port = Port, cacert = CACert, cert = Cert, key = Ke
 	end.
 
 handle_call(stop,_From,Server) ->
+	error_logger:info_msg("Stopping"),
 	{ stop, stopped, Server };
 
 handle_call(Message,_From,Server) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
 	{ reply, ok, Server }.
 
-handle_cast(accept,Server = #mesgd_server{ socket = Socket }) ->
-	mesgd_client:start_link(Socket),
-	accept(),
-	{ noreply, Server };
+handle_cast(listen,Server = #mesgd_server{ socket = Listen }) ->
+	case ssl:transport_accept(Listen) of
+		{ ok, Socket } ->
+			mesgd_client:start(Socket),
+			gen_server:cast(?MODULE,listen),
+			{ noreply, Server };
+		{ error, Reason } ->
+			{ stop, Reason, Server }
+	end;
 
 handle_cast(Message,Server) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),

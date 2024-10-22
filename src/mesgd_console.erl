@@ -7,14 +7,23 @@
 ]).
 
 -include("include/mesgd_http.hrl").
--record(mesgd_console, { socket }).
+-record(mesgd_console, { port, socket, cacert, cert, key }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
 start_link() ->
-	gen_server:start_link({ local, ?MODULE }, ?MODULE, [], []).
+	{ ok, Port } = mesgd_config:get(console_port),
+	{ ok, CACert } = mesgd_config:get(console_cacert),
+	{ ok, Cert } = mesgd_config:get(console_cert),
+	{ ok, Key } = mesgd_config:get(console_key),
+	gen_server:start_link({ local, ?MODULE }, ?MODULE, #mesgd_console{
+		port = Port,
+		cacert = CACert,
+		cert = Cert,
+		key = Key
+	}, []).
 
 stop() ->
 	gen_server:call(?MODULE, stop ).
@@ -23,11 +32,8 @@ stop() ->
 % Private API
 %
 
-init([]) ->
-	{ ok, Port } = mesgd_config:get(console_port),
-	{ ok, CACert } = mesgd_config:get(console_cacert),
-	{ ok, Cert } = mesgd_config:get(console_cert),
-	{ ok, Key } = mesgd_config:get(console_key),
+init(Server = #mesgd_console{ port = Port, cacert = CACert, cert = Cert, key = Key }) ->
+	error_logger:info_msg("Starting management console on ~p~n", [ Port ]),
 	case ssl:listen(Port, [
 		binary,
 		{packet,0},
@@ -39,8 +45,8 @@ init([]) ->
 		{fail_if_no_peer_cert, false}
 	]) of
 		{ ok, Socket } ->
-			gen_server:cast(?MODULE,accept),
-			{ ok, #mesgd_console{ socket = Socket }};
+			gen_server:cast(?MODULE,listen),
+			{ ok, Server#mesgd_console{ socket = Socket }};
 		{ error, Reason } ->
 			error_logger:error_msg("Failed to start console on ~p because: ~p", [ Port, Reason]),
 			{ stop, Reason }
@@ -54,10 +60,15 @@ handle_call(Message,_From,Client) ->
 	error_logger:error_msg("Unknown message: ~p", [ Message ]),
 	{ reply, ok, Client }.
 
-handle_cast(accept,Server = #mesgd_console{ socket = Socket }) ->
-	mesgd_client:start_link(Socket),
-	gen_server:cast(?MODULE,accept),
-	{ noreply, Server };
+handle_cast(listen,Server = #mesgd_console{ socket = Listen }) ->
+	case ssl:transport_accept(Listen) of
+		{ ok, Socket } -> 
+			mesgd_console_client:start(Socket),
+			gen_server:cast(?MODULE,listen),
+			{ noreply, Server };
+		{ error, Reason } ->
+			{ stop, Reason, Server }
+	end;
 
 handle_cast(Message,Server) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
@@ -72,4 +83,3 @@ code_change(_Old,_Extra,Server) ->
 
 terminate(_Reason,_Server) ->
 	ok.
-
