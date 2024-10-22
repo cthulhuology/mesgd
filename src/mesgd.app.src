@@ -22,16 +22,5 @@
 		mesgd_server
 	]},
 	{mod, { mesgd_app, []}},
-	{env, [
-		{ port, 4433 },
-		{ admin_port, 4444 },
-		{ cluster, [ mesgd@localhost ]},
-		{ tables, [ mesgd_auth, mesgd_user ]},
-		{ table_timeout, 20000 },
-		{ salt, <<"thisisareallyterriblesaltdon'tuse">> },
-		{ cacertfile, "priv/cacert.pem" },
-		{ certfile, "priv/cert.pem" },
-		{ keyfile, "priv/key.pem" }
-
-	]}
+	{env, [ ]}
 ]}.

@@ -1,38 +1,38 @@
--module(mesgd_admin).
+
+-module(mesgd_pki_server).
 -author({ "David J Goehrig", "dave@dloh.org" }).
 -copyright(<<"© 2024 David J Goehrig"/utf8>>).
 -behavior(gen_server).
--export([ start_link/0, admin/1, stop/0 ]).
+-export([ start_link/0, pki/1, stop/0 ]).
 -export([ code_change/3, handle_call/3, handle_cast/2, handle_info/2, init/1,
 	terminate/2 ]).
 
--record(mesgd_admin, { admins = [ "admin@localhost" ] }).
+-record(mesgd_pki, { private = [], public = []  }).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Public API
 %
 
-%% Start the admin server
+%% Start the key server
 start_link() ->
 	gen_server:start_link({ local, ?MODULE }, ?MODULE, [], []).
 
-%% Handle admin messages
-admin(Data) ->
-	gen_server:cast(?MODULE, { admin, Data }).	
+%% Handle a pki message
+pki(Data) ->
+	gen_server:cast(?MODULE, { pki, Data }).
 
-%% stop the admin server
+%% Stop the key server
 stop() ->
-	gen_server:call(?MODULE, stop).
+	gen_server:cast(?MODULE, stop).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Private API
 %
 
 init([]) ->
-	%% listen to all of the mesgd admin messages
-	mesgd_pki:load("admin@localhost","admin.pem"),
-	mesgd_router:connect({ ?MODULE, admin },"/mesgd/admin"),
-	{ ok, #mesgd_admin{} }.
+	%% listen to all of the mesgd pki messages
+	mesgd_router:connect({ ?MODULE, pki },"/mesgd/pki"),
+	{ ok, #mesgd_pki{} }.
 
 handle_call(stop,_From,State) ->
 	{ stop, stopped, State };
@@ -41,8 +41,8 @@ handle_call(Message,_From,State) ->
 	error_logger:error_msg("Unknown message ~p", [ Message ]),
 	{ reply, ok, State }.
 
-handle_cast({admin, Data }, State = #mesgd_admin{ }) ->
-	error_log:info_msg("ADMIN: ~p~n",[ Data ]),
+handle_cast({pki, Data }, State = #mesgd_pki{}) ->
+	error_log:info_msg("PKI: ~p~n",[ Data ]),
 	{ noreply, State };
 
 handle_cast(Message,State) ->
@@ -58,4 +58,3 @@ code_change(_Old,_Extra,State) ->
 
 terminate(_Reason,_State) ->
 	ok.
-
