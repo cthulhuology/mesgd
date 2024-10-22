@@ -19,6 +19,6 @@ To generate new JWT siging and Administrator keys you should type:
 And beamer will checkout all the dependencies in the "deps" file, and will install the beams
 in your $HOME/.beamer directory. From there everything is just kinda automatic for the people.
 
-	./mesgd 
+	make start
 
 To run.
