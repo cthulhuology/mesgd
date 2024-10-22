@@ -9,7 +9,6 @@ start_link() ->
 init([]) ->
 	{ ok, { {one_for_one, 5, 10}, [] } }.
 
-
 client(Request) ->
 	error_logger:info_msg("Supervisor starting child  ~p", [ Request ]),
 	supervisor:start_child(?MODULE, #{
