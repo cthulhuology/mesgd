@@ -1,0 +1,41 @@
+<script>
+const t = Sexel.tag('sexel-address',['email','name','address'],{
+	onclick: (e) => { console.log(e); },
+})
+</script>
+<style>
+.sexel-address {
+        display: flex;
+        flex-direction: column;
+	background-color: #f9f9f9;
+	font-size: 16px;		
+        width: 400px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.sexel-address textarea {
+	border: 1px solid #ccc;
+	width: 300px;
+	resize: none;
+}
+
+.sexel-label {
+	vertical-align: top;
+	font-weight: bold;
+}
+</style>
+<template id="sexel-address">
+<table class="sexel-address">
+<tbody>
+<tr><td class="sexel-label">Name:</td><td id="name"></td></tr>
+<tr><td class="sexel-label">Email:</td><td id="email"></td></tr>
+<tr><td  class="sexel-label">Address</td><td><textarea id="address" rows="5" cols="30"></textarea></td></tr>
+</tbody>
+</table>
+</template>
+
+

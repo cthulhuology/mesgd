@@ -1,0 +1,92 @@
+<script>
+    // Define the 'sexel-audio' component using the Sexel framework
+    Sexel.tag('sexel-audio', ['src', 'controls'], {
+        ondraw: (self) => {
+            const audioElement = self.querySelector('#audio-element');
+            const playPauseButton = self.querySelector('#play-pause-button');
+            const stopButton = self.querySelector('#stop-button');
+
+            // Set the audio source from the src attribute
+            audioElement.src = self.src() || '';
+
+            // Show native audio controls if the "controls" attribute is set to "true"
+            audioElement.controls = self.controls() === 'true';
+
+            // Play/pause functionality
+            const playPauseAudio = () => {
+                if (audioElement.paused) {
+                    audioElement.play();
+                    playPauseButton.textContent = 'Pause';
+                } else {
+                    audioElement.pause();
+                    playPauseButton.textContent = 'Play';
+                }
+            };
+
+            // Stop functionality: Pause and reset audio to the beginning
+            const stopAudio = () => {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                playPauseButton.textContent = 'Play';
+            };
+
+            // Attach events to buttons
+            playPauseButton.onclick = playPauseAudio;
+            stopButton.onclick = stopAudio;
+
+            // API methods exposed on the component
+            self.playAudio = () => {
+                audioElement.play();
+                playPauseButton.textContent = 'Pause';
+            };
+
+            self.pauseAudio = () => {
+                audioElement.pause();
+                playPauseButton.textContent = 'Play';
+            };
+
+            self.stopAudio = () => {
+                stopAudio();
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-audio {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .audio-button {
+        background-color: rgb(100, 142, 174);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .audio-button:hover {
+        background-color: rgb(87, 101, 112);
+    }
+</style>
+
+<template id="sexel-audio">
+    <div class="sexel-audio">
+        <!-- Audio Element -->
+        <audio id="audio-element"></audio>
+
+        <!-- Custom Play/Pause and Stop buttons -->
+        <button id="play-pause-button" class="audio-button">Play</button>
+        <button id="stop-button" class="audio-button">Stop</button>
+    </div>
+</template>
+

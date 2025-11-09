@@ -1,0 +1,94 @@
+<script>
+    // Define the 'sexel-upload' component using the Sexel framework
+    Sexel.tag('sexel-upload', ['label', 'multiple', 'accept'], {
+        ondraw: (self) => {
+            const input = self.querySelector('#file-input');
+            const label = self.querySelector('#upload-label');
+            const fileList = self.querySelector('#file-list');
+
+            // Set label
+            label.textContent = self.label() || 'Upload Files';  // Default label
+
+            // Handle multiple attribute
+            if (self.multiple() === 'true') {
+                input.setAttribute('multiple', 'multiple');
+            }
+
+            // Set accepted file types
+            if (self.accept()) {
+                input.setAttribute('accept', self.accept());
+            }
+
+            // Clear file list on re-render
+            fileList.innerHTML = '';
+
+            // Event handler for file input
+            input.onchange = (e) => {
+                const files = e.target.files;
+
+                // Clear the file list before updating it
+                fileList.innerHTML = '';
+
+                // Display the selected files
+                Array.from(files).forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                    fileList.appendChild(listItem);
+                });
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-upload {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    .sexel-upload input {
+        display: none;
+    }
+
+    .sexel-upload label {
+        background-color: rgb(100, 142, 174);
+        color: rgb(250, 250, 250);
+        padding: 10px;
+        text-align: center;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .sexel-upload label:hover {
+        background-color: rgb(87, 101, 112);
+    }
+
+    .sexel-upload ul {
+        margin-top: 10px;
+        list-style-type: none;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .sexel-upload li {
+        padding: 5px 0;
+    }
+</style>
+
+<template id="sexel-upload">
+    <div class="sexel-upload">
+        <ul id="file-list"></ul> <!-- Display uploaded file names here -->
+        <label id="upload-label" for="file-input">Upload Files</label>
+        <input type="file" id="file-input" />
+    </div>
+</template>
+

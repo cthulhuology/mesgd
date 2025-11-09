@@ -1,0 +1,40 @@
+<script>
+Sexel.tag('sexel-grid', ['columns', 'rows', 'gap'], {
+	ondraw: (self) => {
+		const children = [...self.children]
+		children.pop()
+		const content = self.querySelector('#content')
+		const columns = self.columns() || '1fr'
+		const rows = self.rows() || 'auto'
+		const gap = self.gap() || '10px'
+		content.style.gridTemplateColumns = columns
+		content.style.gridTemplateRows = rows
+		content.style.gap = gap
+		var i = 0
+		console.log(children)
+		for (const child of children) {
+			if (child.className == "sexel-grid") break;
+			self.removeChild(child)
+			child.classList.add('.' + i++)
+			console.log(child)
+			console.log(child.classList)
+			content.appendChild(child);
+		}
+	}
+});
+</script>
+
+<style>
+#content {
+	display: grid;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 20px;
+}
+</style>
+
+<template id="sexel-grid">
+<div class="sexel-gird" id="content"></div>
+</template>
+

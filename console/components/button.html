@@ -1,0 +1,21 @@
+<script>
+Sexel.tag('sexel-button',['label','action','image'],{
+	onclick: (self,e) => { fsm(self.action(),self,e) },
+})
+</script>
+<style>
+.sexel-button {
+	display: flex;
+        flex-direction: column;
+}
+
+.sexel-button:hover {
+}
+
+.sexel-button span {
+	text-align: center;
+}
+</style>
+<template id="sexel-button">
+<button class="sexel-button"><span id="label"></span></button>
+</template>

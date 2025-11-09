@@ -1,0 +1,59 @@
+<script>
+    // Define the 'sexel-breadcrumb' component using the Sexel framework
+    Sexel.tag('sexel-breadcrumb', ['items', 'separator'], {
+        ondraw: (self) => {
+            const breadcrumbContainer = self.querySelector('#breadcrumb-container');
+            breadcrumbContainer.innerHTML = '';  // Clear any existing content
+
+            const items = self.items().split(',');  // Get the breadcrumb items from the attribute
+            const separator = self.separator() || '/';  // Set the separator, default to '/'
+
+            items.forEach((item, index) => {
+                const breadcrumbItem = document.createElement('span');
+                breadcrumbItem.textContent = item.trim();
+                breadcrumbItem.classList.add('breadcrumb-item');
+                
+                breadcrumbContainer.appendChild(breadcrumbItem);
+
+                // Add separator except for the last item
+                if (index < items.length - 1) {
+                    const separatorSpan = document.createElement('span');
+                    separatorSpan.textContent = ` ${separator} `;
+                    separatorSpan.classList.add('breadcrumb-separator');
+                    breadcrumbContainer.appendChild(separatorSpan);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .sexel-breadcrumb {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+    }
+
+    .breadcrumb-item {
+        color: rgb(100, 142, 174);  /* Style each breadcrumb item */
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .breadcrumb-item:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: #333;  /* Separator color */
+    }
+</style>
+
+<template id="sexel-breadcrumb">
+    <div class="sexel-breadcrumb" id="breadcrumb-container"></div>
+</template>
+

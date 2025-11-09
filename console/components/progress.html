@@ -1,0 +1,68 @@
+<script>
+    // Define the 'sexel-progress' component using the Sexel framework
+    Sexel.tag('sexel-progress', ['value', 'max', 'label'], {
+        ondraw: (self) => {
+            const progressBar = self.querySelector('#progress-bar');
+            const label = self.querySelector('#progress-label');
+
+            // Get progress progresss and apply default if missing
+            const progress = parseInt(self.value()) || 0;
+            const max = parseInt(self.max()) || 100;
+            const progressPercent = Math.min((progress / max) * 100, 100); // Limit to 100%
+	    console.log(progressPercent)
+
+            // Update label and progress bar width
+            label.textContent = `${progress} / ${max}`;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+    });
+</script>
+
+<style>
+    #sexel-progress {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f1f1f1;
+        padding: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    #progress-bar-container {
+        width: 100%;
+        height: 30px;
+        background-color: #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #progress-bar {
+        height: 100%;
+        background-color: rgb(100, 142, 174);
+        width: 0; 
+        transition: width 0.8s ease-in-out;
+    }
+
+    #progress-label {
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-progress">
+    <div id="sexel-progress">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="progress-label"></div> <!-- Progress percentage or custom label -->
+    </div>
+</template>
+

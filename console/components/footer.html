@@ -1,0 +1,31 @@
+<script>
+    // Define the 'sexel-footer' component using the Sexel framework
+    Sexel.tag('sexel-footer', [], {
+        ondraw: (self) => {
+            const footer = self.querySelector('#sexel-footer');
+            footer.textContent = "© 2024 David J. Goehrig <dave@dloh.org> - All Rights Reserved";  // Example footer content
+        }
+    });
+</script>
+
+<style>
+    /* Make the footer stick to the bottom of the page */
+    .sexel-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        font-family: 'Arial', sans-serif;
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+</style>
+
+<template id="sexel-footer">
+    <div id="sexel-footer" class="sexel-footer"></div>
+</template>
+

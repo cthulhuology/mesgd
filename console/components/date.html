@@ -1,0 +1,70 @@
+<script>
+    // Define the 'sexel-date' component using the Sexel framework
+    Sexel.tag('sexel-date', ['datestamp'], {
+        ondraw: (self) => {
+            const dateInput = self.querySelector('#date-input');
+            const dateDisplay = self.querySelector('#date-display');
+            const initialDate = self.datestamp() ? new Date(self.datestamp()) : new Date();
+
+            // Set the initial value of the date input
+            const formatForInput = (date) => {
+                return date.toISOString().split('T')[0];  // Format to YYYY-MM-DD
+            };
+            dateInput.value = formatForInput(initialDate);
+
+            // Display the formatted selected date
+            const updateDateDisplay = (date) => {
+                dateDisplay.textContent = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            // Initialize display
+            updateDateDisplay(initialDate);
+
+            // Handle date selection changes
+            dateInput.onchange = (e) => {
+                const selectedDate = new Date(e.target.value);
+                updateDateDisplay(selectedDate);
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-date {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 10px 0;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .sexel-date input {
+        padding: 8px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sexel-date-display {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-date">
+    <div class="sexel-date">
+        <!-- Date input picker -->
+        <input type="date" id="date-input" class="sexel-date-input">
+        <!-- Formatted date display -->
+        <div class="sexel-date-display" id="date-display"></div>
+    </div>
+</template>
+

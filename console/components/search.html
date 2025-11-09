@@ -1,0 +1,63 @@
+<script>
+    // Define the 'sexel-search' component using the Sexel framework
+    Sexel.tag('sexel-search', ['placeholder', 'action'], {
+        ondraw: (self) => {
+            const searchInput = self.querySelector('#search-input');
+            const searchButton = self.querySelector('#search-button');
+
+            // Set placeholder from the attribute if provided
+            searchInput.placeholder = self.placeholder() || 'Search...';
+
+            // Attach the search action
+            searchButton.onclick = (e) => {
+                const query = searchInput.value;
+                fsm(self.action(), query, self, e);  // Use FSM to handle search action
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-search {
+        display: flex;
+        align-items: center;
+        margin: 10px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    .sexel-search input {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .sexel-search button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        background-color: rgb(100, 142, 174);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .sexel-search button:hover {
+        background-color: rgb(87, 101, 112);
+    }
+</style>
+
+<template id="sexel-search">
+    <div class="sexel-search">
+        <input type="text" id="search-input" />
+        <button id="search-button">Search</button>
+    </div>
+</template>
+

@@ -1,0 +1,124 @@
+<script>
+    // Define the 'sexel-form' component using the Sexel framework
+    Sexel.tag('sexel-form', ['fields', 'action'], {
+        ondraw: (self) => {
+            const formElement = self.querySelector('#form-element');
+            const formTable = self.querySelector('#form-table');
+            const fieldsConfig = JSON.parse(self.fields()); // Parse the fields object
+
+            // Clear any previously rendered content
+            formTable.innerHTML = '';
+	    const labels = Object.keys(fieldsConfig)
+
+            // Iterate over the fields object to create rows
+            labels.forEach((label) => {
+                const type = fieldsConfig[label];
+
+                // Create a table row
+                const row = document.createElement('tr');
+
+                // Create the label cell
+                const labelCell = document.createElement('td');
+                labelCell.textContent = label;
+                labelCell.classList.add('form-label');
+                row.appendChild(labelCell);
+
+                // Create the input cell
+                const inputCell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = type || 'text';  // Default type is 'text'
+                input.name = label.toLowerCase().replace(/\s+/g, '_');  // Generate a name attribute based on the label
+                input.classList.add('form-input');
+                inputCell.appendChild(input);
+                row.appendChild(inputCell);
+
+                // Append the row to the form table
+                formTable.appendChild(row);
+            });
+
+            // Add a submit button row at the end
+            const submitRow = document.createElement('tr');
+            const submitCell = document.createElement('td');
+            submitCell.colSpan = 2;  // Make the submit button span across both columns
+	    submitCell.classList.add('form-submit-cell');
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Submit';
+            submitButton.classList.add('form-submit');
+            submitCell.appendChild(submitButton);
+            submitRow.appendChild(submitCell);
+            formTable.appendChild(submitRow);
+
+            // Attach onsubmit event to the form element
+            formElement.onsubmit = (e) => {
+                e.preventDefault(); // Prevent the default form submission
+		const values = {}
+		formElement.querySelectorAll('input').forEach( (input) => {
+			values[input.name] = input.value
+		})
+		console.log(self.action(),values)
+                fsm(self.action(), values); // Invoke the fsm action
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Basic styling for the form table */
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+	padding: 20px;
+        font-family: 'Arial', sans-serif;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+.form-table td, .form-table th {
+   padding-right: 10px;
+   padding-left: 10px;
+}
+
+    .form-label {
+        padding: 10px;
+        font-weight: bold;
+        text-align: left;
+	vertical-align: top;
+    }
+
+.form-input {
+        padding: 10px;
+        width: 100%;
+        border: 1px solid #ccc;
+}
+
+/* Submit button styling */
+.form-submit {
+        padding: 10px 20px;
+        border: none;
+        background-color: rgb(100,142,174);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+	margin: auto 0 auto;
+	text-align: right;
+}
+
+.form-submit:hover {
+	background-color: rgb(87,101,112);
+}
+
+td.form-submit-cell {
+    text-align: right;  /* Align content in the cell to the right */
+    padding-right: 10px;  /* Add some padding to separate the button from the content */
+    padding-bottom: 10px;  /* Add some padding to separate the button from the content */
+}
+</style>
+
+<template id="sexel-form">
+    <form id="form-element">
+        <table class="form-table" id="form-table"></table>
+    </form>
+</template>
+

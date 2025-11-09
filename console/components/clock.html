@@ -1,0 +1,55 @@
+<script>
+    // Define the 'sexel-clock' component using the Sexel framework
+    Sexel.tag('sexel-clock', ['datestamp'], {
+        ondraw: (self) => {
+            const clockElement = self.querySelector('#clock-display');
+            const dateStamp = self.datestamp();
+            
+            // Function to format the date and time
+            const formatDateTime = (date) => {
+                return date.toLocaleString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            };
+
+            // If a datestamp is provided, use it; otherwise, show the current time
+            if (dateStamp) {
+                const date = new Date(dateStamp);
+                clockElement.textContent = formatDateTime(date);
+            } else {
+                // Update every second with the current time
+                const updateTime = () => {
+                    const currentDate = new Date();
+                    clockElement.textContent = formatDateTime(currentDate);
+                };
+                updateTime();
+                setInterval(updateTime, 1000); // Refresh every second
+            }
+        }
+    });
+</script>
+
+<style>
+    .sexel-clock {
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<template id="sexel-clock">
+    <div class="sexel-clock" id="clock-display"></div>
+</template>
+

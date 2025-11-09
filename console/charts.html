@@ -1,0 +1,152 @@
+<script>
+Sexel.tag('mesgd-charts', [ 'input', 'output', 'mps' ], {
+	ondraw: (self) => {
+
+	}
+})
+
+</script>
+<template id="mesgd-charts">
+<table>
+<tr><td>
+<sexel-chart id="messagesPerSecond" 
+	key="Messages Per Second"
+	type="line"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "input",
+		"data": [ 100, 80, 34, 22, 200, 123],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "output",
+		"data": [ 200, 73, 53, 35, 100, 134 ],
+		"backgroundColor": "rgb(180,1c2,1f4)"	
+	}]'
+>
+</sexel-chart>
+</td><td>
+<sexel-chart id="tokensPerSecond"
+	key="Tokens Per Second"
+	type="bar"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "input",
+		"data": [ 100, 80, 34, 22, 200, 121 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "output",
+		"data": [ 200, 73, 53, 35, 100, 38 ],
+		"backgroundColor": "rgb(180,1c2,1f4)"	
+	}]'
+>
+</sexel-chart>
+</td><td>
+<sexel-chart id="connectionsPerSecond"
+	key="Connections Per Second"
+	type="line"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "connections",
+		"data": [ 10, 8, 3, 2, 20, 12 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	}]'
+>
+</sexel-chart>
+</td><td>
+<sexel-chart id="errorsPerSecond"
+	key="Errors Per Second"
+	type="line"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "errors",
+		"data": [ 1, 0, 3, 2, 2, 1 ],
+		"backgroundColor": "rgb(174,100,112)"	
+	}]'
+>
+</sexel-chart>
+</td></tr>
+<tr><td>
+<sexel-chart id="inputTokensPerSecond"
+	key="Input Tokens Per Model"
+	type="bar"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "ChatGPT",
+		"data": [ 100, 80, 34, 22, 200, 121 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "Grok",
+		"data": [ 200, 73, 53, 35, 100, 38 ],
+		"backgroundColor": "rgb(180,1c2,1f4)"	
+	},{
+		"label": "Claude",
+		"data": [ 70, 73, 63, 35, 100, 38 ],
+		"backgroundColor": "rgb(180,1f2,1c2)"	
+	},{
+		"label": "Qwen",
+		"data": [ 200, 73, 43, 35, 100, 38 ],
+		"backgroundColor": "rgb(100,174,142)"
+	}]'
+>
+</sexel-chart>
+</td><td>
+<sexel-chart id="outputTokensPerSecond"
+	key="Output Tokens Per Model"
+	type="bar"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "ChatGPT",
+		"data": [ 100, 80, 34, 22, 200, 121 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "Grok",
+		"data": [ 200, 73, 53, 35, 100, 38 ],
+		"backgroundColor": "rgb(180,1c2,1f4)"	
+	},{
+		"label": "Claude",
+		"data": [ 70, 73, 63, 35, 100, 38 ],
+		"backgroundColor": "rgb(180,1f2,1c2)"	
+	},{
+		"label": "Qwen",
+		"data": [ 200, 73, 43, 35, 100, 38 ],
+		"backgroundColor": "rgb(100,174,142)"
+	}]'
+>
+</sexel-chart>
+</td><td>
+<sexel-chart id="claimsPerSecond"
+	key="Claims Per Second"
+	type="bar"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "success",
+		"data": [ 10, 8, 3, 2, 20, 12 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "failure",
+		"data": [ 1, 0, 3, 2, 2, 1 ],
+		"backgroundColor": "rgb(174,100,112)"	
+	}]'
+>
+</sexel-chart>
+
+</td><td>
+<sexel-chart id="grantsPerSecond"
+	key="Grants Per Second"
+	type="bar"
+	labels='["12:00","12:10","12:20","12:30","12:40","12:50"]'
+	data='[{
+		"label": "new",
+		"data": [ 10, 8, 3, 2, 20, 12 ],
+		"backgroundColor": "rgb(100,142,174)"	
+	},{
+		"label": "renewed",
+		"data": [ 1, 0, 3, 2, 2, 1 ],
+		"backgroundColor": "rgb(100,174,142)"	
+	}]'
+>
+</sexel-chart>
+
+</td></tr>
+</table>
+</template>

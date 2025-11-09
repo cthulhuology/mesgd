@@ -1,0 +1,49 @@
+<script>
+    Sexel.tag('sexel-card', ['header'], {
+        ondraw: (self) => {
+            const card = self.querySelector('.card');
+            const contentSlot = self.querySelector('#card-content');
+	    self.querySelector('#card-header').textContent = self.header()	
+	    const children = Array.from(self.children)
+	    for (const child of children) {
+		if (child.className =="card shadow") break;
+		self.removeChild(child)
+		contentSlot.appendChild(child.cloneNode())
+	    }
+        }
+    });
+</script>
+
+<style>
+.card {
+display: block;
+position: inline;
+width: 300px;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+background-color: white;
+padding: 20px;
+cursor: default;
+}
+
+#card-header {
+font-size: 18px;
+font-weight: bold;
+padding: 10px;
+background-color: #f4f4f4;
+border-bottom: 1px solid #ccc;
+}
+
+[draggable="true"] .card {
+cursor: move;
+}
+</style>
+
+<template id="sexel-card">
+    <div class="card shadow">
+        <div id="card-header"></div>
+        <div class="card-body" id="card-content"></div>
+    </div>
+</template>
+

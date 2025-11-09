@@ -1,0 +1,98 @@
+<script>
+    // Define the 'sexel-notification' component using the Sexel framework
+    Sexel.tag('sexel-notification', ['header', 'message', 'type', 'dismissable'], {
+        ondraw: (self) => {
+            const notificationContainer = self.querySelector('#notification-container');
+            const headerElement = self.querySelector('#notification-header');
+            const messageElement = self.querySelector('#notification-message');
+            const closeButton = self.querySelector('#close-button');
+            
+            // Set the header and message if provided
+            headerElement.textContent = self.header() || 'Notification';
+            messageElement.textContent = self.message() || 'This is a notification';
+
+            // Set the notification type (info, success, warning, error) and apply corresponding styles
+            const notificationType = self.type() || 'info';
+            notificationContainer.className = `notification ${notificationType}`;
+
+            // Show or hide the close button based on 'dismissable' attribute
+            if (self.dismissable()) {
+                closeButton.style.display = 'inline';
+            } else {
+                closeButton.style.display = 'none';
+            }
+
+            // Add event listener for close button to hide the notification
+            closeButton.onclick = () => {
+                notificationContainer.style.display = 'none';
+            };
+	  
+            self.open = () => {
+                notificationContainer.style.display = 'block';
+	    }
+            
+	    self.close = () => {
+                notificationContainer.style.display = 'none';
+	    }
+        }
+    });
+</script>
+
+<style>
+    /* Basic styling for notification */
+    .notification {
+        padding: 20px;
+        border-radius: 5px;
+        margin: 10px 0;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Notification types */
+    .notification.info {
+        background-color: #e7f3fe;
+        color: #3178c6;
+    }
+
+    .notification.success {
+        background-color: #e6ffed;
+        color: #27a745;
+    }
+
+    .notification.warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .notification.error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Title styling */
+    .notification-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Close button styling */
+    .notification-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+</style>
+
+<template id="sexel-notification">
+    <div id="notification-container" class="notification">
+        <span id="notification-header" class="notification-header"></span>
+        <p id="notification-message" class="notification-message"></p>
+        <button id="close-button" class="notification-close">&times;</button>
+    </div>
+</template>
+

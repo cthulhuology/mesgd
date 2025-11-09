@@ -1,0 +1,75 @@
+<script>
+    // Define the 'sexel-list' component using the Sexel framework
+    Sexel.tag('sexel-list', ['data', 'decorators'], {
+        ondraw: (self) => {
+            const listContainer = self.querySelector('#list-container');
+            const data = JSON.parse(self.data() || '[]');  // Parse the JSON data
+            const decorators = JSON.parse(self.decorators() || '[]');  // Parse the optional decorators
+            const isOrdered = self.getAttribute('type') === 'ordered';  // Check if it is an ordered list
+            
+            // Clear any previous list
+            listContainer.innerHTML = '';
+
+            // Recursive function to generate list elements
+            const generateList = (items, level = 0) => {
+                const list = document.createElement(isOrdered ? 'ol' : 'ul');
+
+                // Apply different icons for indentation levels if decorators are provided
+                if (decorators[level]) {
+                    list.style.listStyleType = `"${decorators[level]}"`;  // Use a custom decorator for this level
+                }
+
+                items.forEach(item => {
+                    const listItem = document.createElement('li');
+
+                    if (typeof item === 'object' && !Array.isArray(item)) {
+                        const itemLabel = Object.keys(item)[0];  // Get the label (key)
+                        const childItems = item[itemLabel];  // Get the child items (value)
+                        
+                        // Append the label for this item
+                        listItem.textContent = itemLabel;
+
+                        // Recursively add children
+                        listItem.appendChild(generateList(childItems, level + 1));
+                    } else {
+                        // Simple array item
+                        listItem.textContent = item;
+                    }
+
+                    list.appendChild(listItem);
+                });
+
+                return list;
+            };
+
+            // Generate and append the list
+            const listElement = generateList(data);
+            listContainer.appendChild(listElement);
+        }
+    });
+</script>
+
+<style>
+    .sexel-list {
+        width: 100%;
+        padding: 10px;
+        font-family: 'Arial', sans-serif;
+        font-size: 14px;
+    }
+
+    .sexel-list ul,
+    .sexel-list ol {
+        margin: 0;
+        padding-left: 20px;  /* Indentation for nested items */
+        list-style-type: disc;  /* Default list style */
+    }
+
+    .sexel-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+<template id="sexel-list">
+    <div class="sexel-list" id="list-container"></div>
+</template>
+

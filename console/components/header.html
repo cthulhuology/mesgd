@@ -1,0 +1,61 @@
+<script>
+Sexel.tag('sexel-header', ['logo','value'], {
+	ondraw: (self) => {
+		const logo = self.querySelector('#logo')
+		const title = self.querySelector('#value')
+		const rightHeader = self.querySelector("#right-content")
+		logo.src = self.logo()
+		title.textContent = self.value()
+		if (self.innerHTML.trim() === "") return;
+		for (const child of self.children) {
+			if (child.className == "sexel-header") break;
+			self.removeChild(child)
+			rightHeader.appendChild(child)
+		}
+	}
+});
+</script>
+
+<style>
+.sexel-header {
+	display: flex;
+	align-items: center;
+	background-color: #f9f9f9;
+	padding: 10px 20px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	justify-content: space-between;
+}
+
+#logo {
+	width: 50px;
+	height: 50px;
+	margin-right: 20px;
+}
+
+#value {
+	font-weight: bold;
+	font-size: 32px;
+	color: #333;
+}
+
+#left-content {
+	display: flex;
+	margin-left: 0;
+	align-items: center;
+}
+
+#right-content {
+	display: flex;
+	align-items: center;
+	padding-right: 5%;
+}
+</style>
+
+<template id="sexel-header">
+<div class="sexel-header" class="shadow">
+<div id="left-content"><img id="logo" alt="Logo" /><span id="value"></span> </div>
+<div id="right-content"></div>
+</div>
+</template>
+

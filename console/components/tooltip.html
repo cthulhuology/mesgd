@@ -1,0 +1,91 @@
+<script>
+    // Define the 'sexel-tooltip' component using the Sexel framework
+    Sexel.tag('sexel-tooltip', ['message', 'position'], {
+        ondraw: (self) => {
+            const tooltipWrapper = self.querySelector('#tooltip-wrapper');
+            const tooltipMessage = self.querySelector('#tooltip-message');
+            tooltipWrapper.innerHTML = ''; // Clear any existing content
+
+            // Clone the original content inside the tooltip wrapper
+            const originalContent = [...self.childNodes];
+            originalContent.forEach((node) => {
+                tooltipWrapper.appendChild(node.cloneNode(true));
+                node.remove();
+            });
+
+            // Set the tooltip message and position
+            tooltipMessage.textContent = self.message() || 'Tooltip message';
+            const position = self.position() || 'top'; // Default position is 'top'
+            tooltipMessage.classList.add(`tooltip-${position}`);
+
+            // Show and hide tooltip on hover
+            tooltipWrapper.onmouseover = () => {
+                tooltipMessage.style.display = 'block';
+            };
+            tooltipWrapper.onmouseout = () => {
+                tooltipMessage.style.display = 'none';
+            };
+        }
+    });
+</script>
+
+<style>
+    /* Tooltip container */
+    .tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    /* Tooltip text */
+    .tooltip-message {
+        display: none;
+        position: absolute;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 8px;
+        z-index: 1000;
+        font-size: 12px;
+        max-width: 200px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    /* Tooltip positions */
+    .tooltip-top {
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+    }
+
+    .tooltip-bottom {
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 8px;
+    }
+
+    .tooltip-left {
+        top: 50%;
+        right: 100%;
+        transform: translateY(-50%);
+        margin-right: 8px;
+    }
+
+    .tooltip-right {
+        top: 50%;
+        left: 100%;
+        transform: translateY(-50%);
+        margin-left: 8px;
+    }
+</style>
+
+<template id="sexel-tooltip">
+    <div class="tooltip-wrapper" id="tooltip-wrapper">
+        <!-- This is where the original content will be cloned -->
+        <span class="tooltip-message" id="tooltip-message"></span>
+    </div>
+</template>
+

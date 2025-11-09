@@ -1,0 +1,88 @@
+<script>
+    // Define the 'sexel-tabs' component using the Sexel framework
+    Sexel.tag('sexel-tabs', ['tabs'], {
+        ondraw: (self) => {
+            const tabsContainer = self.querySelector('#tabs-container');
+            const contentContainer = self.querySelector('#content-container');
+            
+            // Parse the `tabs` attribute as an array of objects
+            const tabsConfig = JSON.parse(self.tabs());
+
+            // Clear the previous content
+            tabsContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
+
+            // Create tabs dynamically
+            tabsConfig.forEach((tabConfig, index) => {
+                const { label, color, content } = tabConfig;
+
+                // Create tab button
+                const tabButton = document.createElement('button');
+                tabButton.textContent = label;
+                tabButton.style.backgroundColor = color || '#ddd';  // Default color if none provided
+                tabButton.classList.add('tab-button');
+                tabButton.onclick = () => {
+                    // Set the active tab
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    tabButton.classList.add('active');
+
+                    // Display the corresponding tab content
+                    contentContainer.innerHTML = content;
+                };
+
+                // Add the tab button to the tabs container
+                tabsContainer.appendChild(tabButton);
+
+                // Activate the first tab by default
+                if (index === 0) {
+                    tabButton.classList.add('active');
+                    contentContainer.innerHTML = content;
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Styling for the tabs component */
+    .tabs-container {
+        display: flex;
+        border-bottom: 2px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    .tab-button {
+        padding: 10px 40px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        border-radius: 4px 4px 0 0;
+        margin-right: 10px;
+        outline: none;
+	color: rgb(64,64,64);
+    }
+
+    .tab-button.active {
+        font-weight: bold;
+        border-bottom: 2px solid white;
+    }
+
+    .tab-button:hover {
+        background-color: #f0f0f0;
+    }
+
+    .content-container {
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+</style>
+
+<template id="sexel-tabs">
+    <div class="tabs-container" id="tabs-container"></div>
+    <div class="content-container" id="content-container"></div>
+</template>
+

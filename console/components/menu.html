@@ -1,0 +1,55 @@
+<script>
+Sexel.tag('sexel-menu', ['orientation', 'items'], {
+	ondraw: (self) => {
+		const container = self.querySelector('#menu');
+		const orientation = self.orientation() || 'horizontal';
+		container.classList.remove('horizontal', 'vertical');
+		container.classList.add(orientation === 'vertical' ? 'vertical' : 'horizontal');
+		container.innerHTML = ''
+		const buttonNames = self.items().split(',');
+		console.log(buttonNames)
+		buttonNames.forEach((name) => {
+			console.log(name)
+			const label = name.trim()
+			const button = document.createElement('button');
+			button.textContent = label
+			button.setAttribute('data-name', label);
+			button.onclick = (e) => fsm(label,self,e)
+			container.appendChild(button)
+		});
+	}
+});
+</script>
+
+<style>
+.sexel-menu {
+	display: flex;
+	justify-content: center;
+	padding: 10px;
+}
+
+.horizontal {
+	flex-direction: row;
+}
+
+.vertical {
+	flex-direction: column;
+}
+
+.sexel-menu button {
+	border: none;
+	margin: 0px;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 10px;
+	border-radius: 0px;
+}
+
+.sexel-menu button:hover {
+}
+</style>
+
+<template id="sexel-menu">
+<div id="menu" class="sexel-menu"></div>
+</template>
+

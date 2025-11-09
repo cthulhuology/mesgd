@@ -1,0 +1,50 @@
+<script>
+    Sexel.tag('sexel-auth', ['type', 'email', 'password','message'], {
+        onsubmit: (self, e) => {
+            e.preventDefault()
+            const email = self.querySelector('#email').value
+            const password = self.querySelector('#password').value
+	    fsm("auth",email,password)
+        }
+    });
+</script>
+
+<style>
+    .sexel-auth {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sexel-auth input {
+    }
+
+    .sexel-auth button {
+	background-color: rgb(100,142,174);
+	color: rgb(250,250,250);
+    }
+
+    .sexel-auth button:hover {
+        background-color: rgb(87,101,112);
+    }
+
+    .sexel-auth span {
+        color: red;
+        display: none;
+    }
+</style>
+
+<template id="sexel-auth">
+    <form class="sexel-auth">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <span id="message"></span>
+        <button type="submit">Submit</button>
+    </form>
+</template>
+

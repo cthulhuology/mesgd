@@ -1,0 +1,52 @@
+<script>
+Sexel.tag('sexel-sidebar', ['position'], {
+	ondraw: (self) => {
+		const sidebar = self.querySelector('#sidebar-container')
+		const content = self.querySelector('#content')
+		const position = self.position() || 'left'
+		const children = [...self.children]
+		for (const child of children) {
+			if (child.className == 'sexel-sidebar') break;
+			self.removeChild(child)
+			content.appendChild(child)	
+		}
+		content.classList.add('sidebar-' + position)
+	}
+});
+</script>
+
+<style>
+.sexel-sidebar {
+	display: flex;
+	top: 0;
+	bottom: 0;
+	width: 250px;
+	background-color: #f9f9f9;
+	border: 1px solid #ccc;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	overflow-y: auto;
+	transform: translateX(-100%);
+	transition: transform 0.3s ease;
+}
+
+.sidebar-left {
+	left: 0;
+}
+
+.sidebar-right {
+	right: 0;
+	transform: translateX(100%);
+}
+
+.sidebar-content {
+	padding: 15px;
+}
+
+</style>
+
+<template id="sexel-sidebar">
+<div class="sexel-sidebar" id="content">
+</div>
+</template>
+

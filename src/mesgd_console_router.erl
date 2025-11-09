@@ -128,6 +128,7 @@ static_file(#request{ path = Path }) ->
 
 content_type("html") -> <<"text/html">>;
 content_type("txt") -> <<"text/plain">>;
+content_type("css") -> <<"text/css">>;
 content_type("js") -> <<"application/javascript">>;
 content_type("mjs") -> <<"application/javascript">>;
 content_type("cjs") -> <<"application/javascript">>;

@@ -1,0 +1,64 @@
+<script>
+    // Define the 'sexel-rating' component using the Sexel framework
+    Sexel.tag('sexel-rating', ['max', 'value', 'char'], {
+        ondraw: (self) => {
+            const ratingContainer = self.querySelector('#rating-container');
+            const maxStars = parseInt(self.max()) || 5;  // Default to 5 stars
+            let ratingValue = parseInt(self.value()) || 0;  // Default to 0 (no rating)
+            const character = self.char() || '★';  // Default character is a star
+
+            // Render stars based on the current rating
+            const renderStars = () => {
+                ratingContainer.innerHTML = '';  // Clear previous stars
+
+                for (let i = 1; i <= maxStars; i++) {
+                    const star = document.createElement('span');
+                    star.textContent = character;  // Use the provided character
+                    star.classList.add('star');
+                    
+                    if (i <= ratingValue) {
+                        star.classList.add('selected');
+                    }
+
+                    // Click event to set the rating
+                    star.onclick = () => {
+                        ratingValue = i;
+                        self.value(ratingValue);  // Update the 'value' attribute
+                        renderStars();  // Re-render the stars
+                    };
+
+                    ratingContainer.appendChild(star);
+                }
+            };
+
+            // Initialize the stars
+            renderStars();
+        }
+    });
+</script>
+
+<style>
+    .sexel-rating {
+        display: inline-block;
+    }
+
+    .star {
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        color: #ccc;  /* Default unselected star color */
+    }
+
+    .star.selected {
+        color: rgb(255, 215, 0);  /* Gold color for selected stars */
+    }
+
+    .star:hover {
+        color: rgb(255, 185, 15);  /* Slightly different color on hover */
+    }
+</style>
+
+<template id="sexel-rating">
+    <div class="sexel-rating" id="rating-container"></div>
+</template>
+

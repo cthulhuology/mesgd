@@ -1,0 +1,90 @@
+<script>
+    // Define the 'sexel-slider' component using the Sexel framework
+    Sexel.tag('sexel-slider', ['min', 'max', 'value', 'label'], {
+        ondraw: (self) => {
+            const sliderInput = self.querySelector('#slider-input');
+            const sliderValueLabel = self.querySelector('#slider-value');
+            const label = self.querySelector('#slider-label');
+
+            // Set the initial values from attributes or default values
+            const min = self.min() || 0;
+            const max = self.max() || 100;
+            const value = self.value() || 50;
+
+            sliderInput.min = min;
+            sliderInput.max = max;
+            sliderInput.value = value;
+
+            // Display the current value and label
+            sliderValueLabel.textContent = `${value}`;
+            label.textContent = self.label() || '';
+
+            // Handle input change to update value
+            sliderInput.oninput = (e) => {
+                const newValue = e.target.value;
+                sliderValueLabel.textContent = `${newValue}`;
+                self.value(newValue);  // Update the 'value' attribute
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-slider {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .slider-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .slider-input {
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 10px;
+        background: #ddd;
+        outline: none;
+        border-radius: 5px;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background-color: rgb(100, 142, 174);
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .slider-input::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background-color: rgb(100, 142, 174);
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .slider-value {
+        font-size: 14px;
+        color: #333;
+        margin-top: 5px;
+    }
+</style>
+
+<template id="sexel-slider">
+    <div class="sexel-slider">
+        <span class="slider-label" id="slider-label"></span>
+        <input type="range" id="slider-input" class="slider-input" />
+        <span class="slider-value" id="slider-value"></span>
+    </div>
+</template>
+

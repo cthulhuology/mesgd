@@ -1,0 +1,120 @@
+<script>
+    // Define the 'sexel-pages' component using the Sexel framework
+    Sexel.tag('sexel-pages', ['itemsPerPage'], {
+        ondraw: (self) => {
+            const pageContainer = self.querySelector('#page-container');
+            const paginationControls = self.querySelector('#pagination-controls');
+            const originalContent = [...self.childNodes];  // Capture all child nodes
+            const itemsPerPage = parseInt(self.itemsPerPage()) || 5;  // Default to 5 items per page
+            let currentPage = 1;
+            let totalItems = 0;
+            let totalPages = 0;
+
+            // Function to render items for the current page
+            const renderPage = () => {
+                pageContainer.innerHTML = '';  // Clear current content
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageItems = originalContent.slice(start, end);
+                pageItems.forEach(item => {
+                    pageContainer.appendChild(item.cloneNode(true));  // Clone and display items for this page
+                });
+                updatePaginationControls();
+            };
+
+            // Function to update pagination controls (previous/next buttons)
+            const updatePaginationControls = () => {
+                paginationControls.innerHTML = '';  // Clear controls
+
+                // Create "Previous" button
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.disabled = (currentPage === 1);
+                prevButton.onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPage();
+                    }
+                };
+                paginationControls.appendChild(prevButton);
+
+                // Create page number display
+                const pageDisplay = document.createElement('span');
+                pageDisplay.textContent = ` Page ${currentPage} of ${totalPages} `;
+                paginationControls.appendChild(pageDisplay);
+
+                // Create "Next" button
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.disabled = (currentPage === totalPages);
+                nextButton.onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPage();
+                    }
+                };
+                paginationControls.appendChild(nextButton);
+            };
+
+            // Initialization function
+            const initializePagination = () => {
+                totalItems = originalContent.length;
+                totalPages = Math.ceil(totalItems / itemsPerPage);
+                renderPage();
+            };
+
+            // Remove the original content from the DOM to prevent it from being displayed initially
+            originalContent.forEach(node => node.remove());
+
+            // Initialize the pagination
+            initializePagination();
+        }
+    });
+</script>
+
+<style>
+    .sexel-pages {
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        align-items: center;
+    }
+
+    .pagination-controls button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        background-color: rgb(100, 142, 174);
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: bold;
+        margin: 0 5px;
+    }
+
+    .pagination-controls button:disabled {
+        background-color: rgb(192, 192, 192);
+        cursor: not-allowed;
+    }
+
+    .pagination-controls span {
+        font-size: 14px;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-pages">
+    <div class="sexel-pages">
+        <!-- Page content will be dynamically rendered here -->
+        <div id="page-container"></div>
+
+        <!-- Pagination controls (previous, next buttons) -->
+        <div class="pagination-controls" id="pagination-controls"></div>
+    </div>
+</template>
+

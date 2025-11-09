@@ -1,0 +1,133 @@
+<script>
+    // Define the 'sexel-modal' component using the Sexel framework
+    Sexel.tag('sexel-modal', ['header', 'okLabel', 'cancelLabel'], {
+        ondraw: (self) => {
+            const modalOverlay = self.querySelector('#modal-overlay');
+            const modalContainer = self.querySelector('#modal-container');
+            const okButton = self.querySelector('#ok-button');
+            const cancelButton = self.querySelector('#cancel-button');
+            const modalHeader = self.querySelector('#modal-header');
+
+            // Clone and move the original content into the modal content area
+            const contentSlot = self.querySelector('#modal-content');
+            const originalContent = [...self.childNodes];  // Capture all child nodes
+            originalContent.forEach(node => {
+                contentSlot.appendChild(node.cloneNode(true));  // Clone and move original content
+                node.remove();  // Remove original content from DOM to avoid display issues
+            });
+
+            // Set modal header and button labels
+            modalHeader.textContent = self.header() || 'Modal';  // Default header
+            okButton.textContent = self.okLabel() || 'OK';  // Default OK button label
+            cancelButton.textContent = self.cancelLabel() || 'Cancel';  // Default Cancel button label
+
+            // Functions to open and close the modal
+            const closeModal = () => {
+                modalOverlay.classList.remove('active');  // Hide the modal
+            };
+
+            const openModal = () => {
+                modalOverlay.classList.add('active');  // Show the modal
+            };
+
+            // Attach event listeners
+            okButton.onclick = closeModal;
+            cancelButton.onclick = closeModal;
+
+            // Make open and close functions accessible
+            self.open = openModal;
+            self.close = closeModal;
+        }
+    });
+</script>
+
+<style>
+    /* Modal overlay */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    /* Modal container with shadow, padding, and border */
+    .modal-container {
+        background-color: white;
+        padding: 20px;
+        max-width: 600px;
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #ccc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modal header */
+    .modal-header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    /* Modal content */
+    .modal-content {
+        margin-bottom: 20px;
+    }
+
+    /* Modal buttons */
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .modal-buttons button {
+        padding: 10px 20px;
+        margin-left: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .ok-button {
+        background-color: rgb(100, 142, 174);
+        color: white;
+    }
+
+    .ok-button:hover {
+        background-color: rgb(87, 101, 112);
+        color: white;
+    }
+
+    .cancel-button {
+        background-color: rgb(128, 128, 128);
+        color: white;
+    }
+
+    .cancel-button:hover {
+        background-color: rgb(64, 64, 64);
+        color: white;
+    }
+</style>
+
+<template id="sexel-modal">
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-container" id="modal-container">
+            <div class="modal-header" id="modal-header">Modal Header</div>
+            <div class="modal-content" id="modal-content"></div> <!-- Cloned content will be placed here -->
+            <div class="modal-buttons">
+                <button id="cancel-button" class="cancel-button">Cancel</button>
+                <button id="ok-button" class="ok-button">OK</button>
+            </div>
+        </div>
+    </div>
+</template>
+

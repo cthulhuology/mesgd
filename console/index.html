@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mesgd Server Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" ></script>
+<script type="module" src="sexel.mjs"></script>
+<script type="module" src="pki.mjs"></script>
+<script type="module">
+import { handler } from './sexel.mjs'
+handler({
+    Dashboard: (e) => { console.log("Navigating to Dashboard") },
+    Messages: (e) => { console.log("Viewing Messages") },
+    Analytics: (e) => { console.log("Viewing Analytics") },
+    Settings: (e) => { console.log("Opening Settings") },
+    showLoginModal: (e) => { loginModal.open(); }
+});
+</script>
+<link rel="stylesheet" href="sexel.css" />
+<link rel="import" href="components.html" />
+<link rel="import" href="charts.html" />
+<style>
+.0 { grid-row: 1 / span 2; grid-column: 1  }
+.1 { grid-row: 2; grid-column: 1; }
+.2 { grid-row: 2; grid-column: 2; }
+</style>
+</head>
+<body>
+<sexel-header id="header" logo="images/avatar.png" value="Mesgd Dashboard">
+<sexel-breadcrumb id="breadcrumb" items="Home, Dashboard" separator=">"></sexel-breadcrumb>
+<sexel-button style="padding-left: 20px" id="loginButton" label="Login" action="showLoginModal"></sexel-button>
+</sexel-header>
+<sexel-grid columns="200px 1fr 20px" rows="1fr 1fr auto" gap="10px">
+<sexel-menu orientation="vertical" items="Dashboard,Messages,Analytics,Settings"></sexel-menu>
+<div>
+<mesgd-charts id="metrics"></mesgd-charts>
+
+<sexel-chat id="chatWidget"></sexel-chat>
+</div>
+</sexel-grid>
+<sexel-footer></sexel-footer>
+
+<!-- Modal for Login -->
+<sexel-dialog id="loginModal" okLabel="Login" cancelLabel="Cancel" label="Login" message="Enter your credentials">
+<sexel-auth></sexel-auth>
+</sexel-dialog>
+</body>
+</html>
+

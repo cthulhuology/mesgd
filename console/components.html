@@ -1,0 +1,2582 @@
+<script>
+const t = Sexel.tag('sexel-address',['email','name','address'],{
+	onclick: (e) => { console.log(e); },
+})
+</script>
+<style>
+.sexel-address {
+        display: flex;
+        flex-direction: column;
+	background-color: #f9f9f9;
+	font-size: 16px;		
+        width: 400px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.sexel-address textarea {
+	border: 1px solid #ccc;
+	width: 300px;
+	resize: none;
+}
+
+.sexel-label {
+	vertical-align: top;
+	font-weight: bold;
+}
+</style>
+<template id="sexel-address">
+<table class="sexel-address">
+<tbody>
+<tr><td class="sexel-label">Name:</td><td id="name"></td></tr>
+<tr><td class="sexel-label">Email:</td><td id="email"></td></tr>
+<tr><td  class="sexel-label">Address</td><td><textarea id="address" rows="5" cols="30"></textarea></td></tr>
+</tbody>
+</table>
+</template>
+
+
+<script>
+    // Define the 'sexel-audio' component using the Sexel framework
+    Sexel.tag('sexel-audio', ['src', 'controls'], {
+        ondraw: (self) => {
+            const audioElement = self.querySelector('#audio-element');
+            const playPauseButton = self.querySelector('#play-pause-button');
+            const stopButton = self.querySelector('#stop-button');
+
+            // Set the audio source from the src attribute
+            audioElement.src = self.src() || '';
+
+            // Show native audio controls if the "controls" attribute is set to "true"
+            audioElement.controls = self.controls() === 'true';
+
+            // Play/pause functionality
+            const playPauseAudio = () => {
+                if (audioElement.paused) {
+                    audioElement.play();
+                    playPauseButton.textContent = 'Pause';
+                } else {
+                    audioElement.pause();
+                    playPauseButton.textContent = 'Play';
+                }
+            };
+
+            // Stop functionality: Pause and reset audio to the beginning
+            const stopAudio = () => {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                playPauseButton.textContent = 'Play';
+            };
+
+            // Attach events to buttons
+            playPauseButton.onclick = playPauseAudio;
+            stopButton.onclick = stopAudio;
+
+            // API methods exposed on the component
+            self.playAudio = () => {
+                audioElement.play();
+                playPauseButton.textContent = 'Pause';
+            };
+
+            self.pauseAudio = () => {
+                audioElement.pause();
+                playPauseButton.textContent = 'Play';
+            };
+
+            self.stopAudio = () => {
+                stopAudio();
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-audio {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .audio-button {
+        background-color: rgb(100, 142, 174);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .audio-button:hover {
+        background-color: rgb(87, 101, 112);
+    }
+</style>
+
+<template id="sexel-audio">
+    <div class="sexel-audio">
+        <!-- Audio Element -->
+        <audio id="audio-element"></audio>
+
+        <!-- Custom Play/Pause and Stop buttons -->
+        <button id="play-pause-button" class="audio-button">Play</button>
+        <button id="stop-button" class="audio-button">Stop</button>
+    </div>
+</template>
+
+<script>
+    Sexel.tag('sexel-auth', ['type', 'email', 'password','message'], {
+        onsubmit: (self, e) => {
+            e.preventDefault()
+            const email = self.querySelector('#email').value
+            const password = self.querySelector('#password').value
+	    fsm("auth",email,password)
+        }
+    });
+</script>
+
+<style>
+    .sexel-auth {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sexel-auth input {
+    }
+
+    .sexel-auth button {
+	background-color: rgb(100,142,174);
+	color: rgb(250,250,250);
+    }
+
+    .sexel-auth button:hover {
+        background-color: rgb(87,101,112);
+    }
+
+    .sexel-auth span {
+        color: red;
+        display: none;
+    }
+</style>
+
+<template id="sexel-auth">
+    <form class="sexel-auth">
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <span id="message"></span>
+        <button type="submit">Submit</button>
+    </form>
+</template>
+
+<script>
+    // Define the 'sexel-avatar' component using the Sexel framework
+    Sexel.tag('sexel-avatar', ['img', 'name', 'username', 'email', 'jwk'], {
+        ondraw: (self) => {
+            const avatarImage = self.querySelector('#avatar-image');
+            const tooltip = self.querySelector('#avatar-tooltip');
+            const userInfo = {
+                name: self.name() || 'Unknown Name',
+                username: self.username() || 'Unknown Username',
+                email: self.email() || 'Unknown Email',
+                jwk: self.jwk() || 'No JWK Provided'
+            };
+
+            // Set the avatar image source
+            avatarImage.src = self.img() || 'default-avatar.png';  // Default image if not provided
+            avatarImage.alt = userInfo.name;
+
+            // Set the tooltip content
+            tooltip.innerHTML = `
+                <strong>Name:</strong> ${userInfo.name}<br>
+                <strong>Username:</strong> ${userInfo.username}<br>
+                <strong>Email:</strong> ${userInfo.email}<br>
+                <strong>JWK:</strong> ${userInfo.jwk}
+            `;
+
+            // Show and hide tooltip on hover
+            avatarImage.onmouseover = () => {
+                tooltip.style.display = 'block';
+            };
+            avatarImage.onmouseout = () => {
+                tooltip.style.display = 'none';
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-avatar {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+    }
+
+    .avatar-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+    .avatar-tooltip {
+        display: none;
+        position: absolute;
+        top: 60px;  /* Adjust as needed */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        text-align: left;
+        z-index: 1000;
+        white-space: nowrap;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<template id="sexel-avatar">
+    <div class="sexel-avatar">
+        <!-- User Image -->
+        <img id="avatar-image" class="avatar-image" src="default-avatar.png" alt="User Avatar" />
+        <!-- Tooltip with user information -->
+        <div class="avatar-tooltip" id="avatar-tooltip"></div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-breadcrumb' component using the Sexel framework
+    Sexel.tag('sexel-breadcrumb', ['items', 'separator'], {
+        ondraw: (self) => {
+            const breadcrumbContainer = self.querySelector('#breadcrumb-container');
+            breadcrumbContainer.innerHTML = '';  // Clear any existing content
+
+            const items = self.items().split(',');  // Get the breadcrumb items from the attribute
+            const separator = self.separator() || '/';  // Set the separator, default to '/'
+
+            items.forEach((item, index) => {
+                const breadcrumbItem = document.createElement('span');
+                breadcrumbItem.textContent = item.trim();
+                breadcrumbItem.classList.add('breadcrumb-item');
+                
+                breadcrumbContainer.appendChild(breadcrumbItem);
+
+                // Add separator except for the last item
+                if (index < items.length - 1) {
+                    const separatorSpan = document.createElement('span');
+                    separatorSpan.textContent = ` ${separator} `;
+                    separatorSpan.classList.add('breadcrumb-separator');
+                    breadcrumbContainer.appendChild(separatorSpan);
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .sexel-breadcrumb {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Subtle shadow */
+    }
+
+    .breadcrumb-item {
+        color: rgb(100, 142, 174);  /* Style each breadcrumb item */
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .breadcrumb-item:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb-separator {
+        color: #333;  /* Separator color */
+    }
+</style>
+
+<template id="sexel-breadcrumb">
+    <div class="sexel-breadcrumb" id="breadcrumb-container"></div>
+</template>
+
+<script>
+Sexel.tag('sexel-button',['label','action','image'],{
+	onclick: (self,e) => { fsm(self.action(),self,e) },
+})
+</script>
+<style>
+.sexel-button {
+	display: flex;
+        flex-direction: column;
+}
+
+.sexel-button:hover {
+}
+
+.sexel-button span {
+	text-align: center;
+}
+</style>
+<template id="sexel-button">
+<button class="sexel-button"><span id="label"></span></button>
+</template>
+<script>
+    Sexel.tag('sexel-card', ['header'], {
+        ondraw: (self) => {
+            const card = self.querySelector('.card');
+            const contentSlot = self.querySelector('#card-content');
+	    self.querySelector('#card-header').textContent = self.header()	
+	    const children = Array.from(self.children)
+	    for (const child of children) {
+		if (child.className =="card shadow") break;
+		self.removeChild(child)
+		contentSlot.appendChild(child.cloneNode())
+	    }
+        }
+    });
+</script>
+
+<style>
+.card {
+display: block;
+position: inline;
+width: 300px;
+border: 1px solid #ccc;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+background-color: white;
+padding: 20px;
+cursor: default;
+}
+
+#card-header {
+font-size: 18px;
+font-weight: bold;
+padding: 10px;
+background-color: #f4f4f4;
+border-bottom: 1px solid #ccc;
+}
+
+[draggable="true"] .card {
+cursor: move;
+}
+</style>
+
+<template id="sexel-card">
+    <div class="card shadow">
+        <div id="card-header"></div>
+        <div class="card-body" id="card-content"></div>
+    </div>
+</template>
+
+<script>
+Sexel.tag('sexel-carousel', ['delay'], {
+	ondraw: (self) => {
+		const carousel = self.querySelector('#carousel');
+		const children = [...self.children]
+		for (const child of children) {
+			if (child.id =="carousel") break;
+			self.removeChild(child)
+			carousel.appendChild(child)
+		}
+		const slides = [...carousel.querySelectorAll('.carousel-slide')]
+		let currentIndex = 0
+		let intervalId;
+		const delay = parseInt(self.delay()) || 3000;
+		const showSlide = (index) => {
+			slides.forEach((slide, i) => {
+			    slide.style.display = (i === index) ? 'flex' : 'none';
+			});
+		}
+		const nextSlide = () => {
+			currentIndex = (currentIndex + 1) % slides.length;
+			showSlide(currentIndex);
+		}
+		showSlide(currentIndex);
+		const startCarousel = () => {
+			intervalId = setInterval(nextSlide, delay);
+		}
+		const stopCarousel = () => {
+			clearInterval(intervalId)
+		}
+		startCarousel();
+	}
+})
+</script>
+
+<style>
+#carousel {
+display: flex;
+overflow: hidden;
+margin: 0 auto;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+max-width: 200px; 
+}
+.carousel-slide {
+display: none;
+transition: opacity 1s ease-in-out;
+}
+.carousel-slide.active {
+display: flex;
+}
+</style>
+
+<template id="sexel-carousel">
+<div id="carousel"></div>
+</template>
+
+<script>
+    // Define the 'sexel-chart' component using the Sexel framework
+    Sexel.tag('sexel-chart', ['type','labels','data','key'], {
+        ondraw: (self) => {
+            const chartContainer = self.querySelector('#chart-container');
+            chartContainer.innerHTML = '';  // Clear any previous chart
+
+            // Create a canvas element for the chart
+            const canvas = document.createElement('canvas');
+            chartContainer.appendChild(canvas);
+
+            // Get data, labels, and colors
+	    console.log( "key", self.key())
+	    console.log( "data", self.data())
+	    console.log( "labels", self.labels())
+	    console.log( "type", self.type())
+	    const chartTitle = self.key() ? self.key() : false
+            const chartData = JSON.parse(self.data());  	// Parse the data string into an array of objects
+            const chartType = self.type() || 'bar';  // Default chart type is 'bar'
+	    const chartLabels = self.labels() ? JSON.parse(self.labels()) : []
+
+            // Prepare the chart configuration
+            const config = {
+                type: chartType,  // Chart type (bar, line, pie, etc.)
+                data: {
+                    labels: chartLabels,
+                    datasets: chartData,
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+		    plugins: {
+			    legend: {
+				position: 'bottom'
+			    },	
+			    title: {
+				display : true, // chartTitle ? true : false,
+				text: chartTitle
+			    }
+		   }
+  		
+		}
+            };
+
+            // Create the chart using Chart.js
+            new Chart(canvas, config);
+        }
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.js"></script>
+
+<style>
+    /* Basic styling for the chart container */
+    .chart-container {
+        max-width: 600px;
+        padding: 20px;
+    }
+</style>
+
+<template id="sexel-chart">
+    <div class="chart-container" id="chart-container"></div>
+</template>
+
+<script>
+Sexel.tag('sexel-chat', ['endpoint','to', 'from'], {
+	ondraw: (self) => {
+		const chatHistory = self.querySelector('#chat-history')
+		const messageInput = self.querySelector('#message-input')
+		const uploadButton = self.querySelector('#upload-button')
+		const downloadButton = self.querySelector('#download-button')
+		const unicodeButton = self.querySelector('#unicode-button')
+		const unicodeGrid = self.querySelector('#unicode-grid')
+		let chatLog = ''
+
+		const to = self.to()
+		const from = self.from()
+		const endpoint = self.endpoint()
+		const websocketUrl = `wss://${endpoint}/${from}/${to}`
+		if (endpoint) { 
+			// NB: this is going to get replaced in the near future
+			// it will use mesgd.org and a pub/priv key infrastructure
+			// with JWK and JWT authentication
+			const ws = new WebSocket(websocketUrl)
+			ws.onmessage = (event) => {
+				const message = event.data;
+				chatLog += `${message}\n`;
+				chatHistory.textContent += `${message}\n`;
+				chatHistory.scrollTop = chatHistory.scrollHeight;
+			}
+		}
+		const sendMessage = () => {
+			const message = messageInput.value.trim();
+			if (message) {
+			    if (endpoint) ws.send(message);
+			    chatHistory.textContent += `${from}: ${message}\n`
+			    chatLog += `${from}: ${message}\n`
+			    messageInput.value = ''
+			    chatHistory.scrollTop = chatHistory.scrollHeight
+			}
+		}
+		messageInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+			    e.preventDefault()
+			    sendMessage()
+			}
+		});
+		unicodeButton.onclick = () => {
+			unicodeGrid.style.display = unicodeGrid.style.display === 'block' ? 'none' : 'block';
+		};
+
+		unicodeGrid.querySelectorAll('button').forEach((button) => {
+			button.onclick = () => {
+			    messageInput.value += button.textContent
+			    unicodeGrid.style.display = 'none'
+			}
+		})
+
+		uploadButton.onchange = (e) => {
+			const file = e.target.files[0]
+			if (file) {
+			    const reader = new FileReader()
+			    reader.onload = () => {
+				const fileContent = reader.result
+				ws.send(fileContent)
+				chatHistory.textContent += `${from} sent a file: ${file.name}\n`
+				chatLog += `${from} sent a file: ${file.name}\n`
+			    }
+			    reader.readAsText(file)
+			}
+		}
+
+		downloadButton.onclick = () => {
+			const blob = new Blob([chatLog], { type: 'text/plain' })
+			const link = document.createElement('a')
+			link.href = URL.createObjectURL(blob)
+			link.download = 'chat-log.txt'
+			link.click()
+		}
+	}
+})
+</script>
+
+<style>
+.sexel-chat {
+display: flex;
+flex-direction: column;
+width: 100%;
+height: 400px;
+border: 1px solid #ccc;
+border-radius: 8px;
+background-color: #f9f9f9;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chat-history {
+flex: 1;
+padding: 10px;
+overflow-y: auto;
+border-bottom: 1px solid #ccc;
+font-family: 'Arial', sans-serif;
+font-size: 14px;
+white-space: pre-wrap;
+}
+
+.chat-input-area {
+display: flex;
+align-items: center;
+padding: 10px;
+}
+
+.message-input {
+flex: 1;
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 4px;
+font-size: 14px;
+margin-right: 10px;
+}
+
+.upload-button, .unicode-button, .download-button {
+background-color: rgb(100, 142, 174);
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+font-size: 14px;
+padding: 8px 12px;
+margin-left: 5px;
+}
+
+.upload-button:hover, .unicode-button:hover, .download-button:hover {
+background-color: rgb(87, 101, 112);
+}
+
+.unicode-grid {
+display: none;
+position: absolute;
+background-color: white;
+border: 1px solid #ccc;
+padding: 10px;
+grid-template-columns: repeat(5, 1fr);
+gap: 5px;
+}
+
+.unicode-grid button {
+font-size: 20px;
+cursor: pointer;
+padding: 8px;
+border: none;
+background-color: rgb(240, 240, 240);
+}
+
+.unicode-grid button:hover {
+background-color: rgb(220, 220, 220);
+}
+</style>
+
+<template id="sexel-chat">
+    <div class="sexel-chat">
+        <div class="chat-history" id="chat-history"></div>
+        <div class="chat-input-area">
+            <textarea id="message-input" class="message-input" placeholder="Type your message..."></textarea>
+            <input type="file" id="upload-button" class="upload-button" title="Upload a file" />
+            <button id="unicode-button" class="unicode-button">☺</button>
+            <button id="download-button" class="download-button">Download Log</button>
+        </div>
+        <div class="unicode-grid" id="unicode-grid">
+            <button>☺</button>
+            <button>☹</button>
+            <button>✿</button>
+            <button>♠</button>
+            <button>♣</button>
+            <button>★</button>
+            <button>♥</button>
+            <button>♦</button>
+            <button>♫</button>
+            <button>☕</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-clock' component using the Sexel framework
+    Sexel.tag('sexel-clock', ['datestamp'], {
+        ondraw: (self) => {
+            const clockElement = self.querySelector('#clock-display');
+            const dateStamp = self.datestamp();
+            
+            // Function to format the date and time
+            const formatDateTime = (date) => {
+                return date.toLocaleString('en-US', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            };
+
+            // If a datestamp is provided, use it; otherwise, show the current time
+            if (dateStamp) {
+                const date = new Date(dateStamp);
+                clockElement.textContent = formatDateTime(date);
+            } else {
+                // Update every second with the current time
+                const updateTime = () => {
+                    const currentDate = new Date();
+                    clockElement.textContent = formatDateTime(currentDate);
+                };
+                updateTime();
+                setInterval(updateTime, 1000); // Refresh every second
+            }
+        }
+    });
+</script>
+
+<style>
+    .sexel-clock {
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<template id="sexel-clock">
+    <div class="sexel-clock" id="clock-display"></div>
+</template>
+
+<script>
+    // Define the 'sexel-code' component using the Sexel framework
+    Sexel.tag('sexel-code', ['language'], {
+        ondraw: (self) => {
+		const codeBlock = document.createElement('code')
+		const language = self.language() || 'javascript'; // Default to 'javascript' if no language is specified
+		codeBlock.classList.add(`language-${language}`)
+		codeBlock.classList.add('shadow')
+		console.log(self.textContent)
+		const txt = self.textContent
+		self.textContent = ''	// remove old contents
+		console.log(txt)
+		codeBlock.innerHTML = hljs.highlightAuto(txt).value;
+		self.appendChild(codeBlock)
+        }
+    });
+</script>
+
+<style>
+
+    code {
+	display: block;
+	white-space: pre;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+	padding: 10px;
+        border-radius: 5px;
+        background-color: #f4f4f4;
+        overflow-x: auto;
+
+    }
+</style>
+
+<!-- Template for the sexel-code component -->
+<template id="sexel-code">
+</template>
+
+
+<script>
+    // Define the 'sexel-data' component using Sexel framework
+    Sexel.tag('sexel-data', ['header', 'data'], {
+        ondraw: (self) => {
+            const tableContainer = self.querySelector('#table-container');
+            tableContainer.innerHTML = '';  // Clear any previously rendered table
+
+            // Create the table element
+            const table = document.createElement('table');
+            table.classList.add('sexel-table');
+
+            // Add headers if provided
+            if (self.header()) {
+                const headers = JSON.parse(self.header());  // Parse the header string into an array
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                
+                headers.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header.trim();
+                    headerRow.appendChild(th);
+                });
+
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+            }
+
+            // Add data rows if provided
+            if (self.data()) {
+                const data = JSON.parse(self.data());  // Parse the data string into an array of arrays
+                const tbody = document.createElement('tbody');
+
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.textContent = cell;
+                        tr.appendChild(td);
+                    });
+
+                    tbody.appendChild(tr);
+                });
+
+                table.appendChild(tbody);
+            }
+
+            // Append the constructed table to the container
+            tableContainer.appendChild(table);
+        }
+    });
+</script>
+
+<style>
+    /* Basic table styling */
+    .sexel-table {
+        border-collapse: collapse;
+        margin: 10px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    .sexel-table th, .sexel-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .sexel-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .sexel-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+</style>
+
+<template id="sexel-data">
+    <div id="table-container"></div>
+</template>
+
+<script>
+    // Define the 'sexel-date' component using the Sexel framework
+    Sexel.tag('sexel-date', ['datestamp'], {
+        ondraw: (self) => {
+            const dateInput = self.querySelector('#date-input');
+            const dateDisplay = self.querySelector('#date-display');
+            const initialDate = self.datestamp() ? new Date(self.datestamp()) : new Date();
+
+            // Set the initial value of the date input
+            const formatForInput = (date) => {
+                return date.toISOString().split('T')[0];  // Format to YYYY-MM-DD
+            };
+            dateInput.value = formatForInput(initialDate);
+
+            // Display the formatted selected date
+            const updateDateDisplay = (date) => {
+                dateDisplay.textContent = date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            // Initialize display
+            updateDateDisplay(initialDate);
+
+            // Handle date selection changes
+            dateInput.onchange = (e) => {
+                const selectedDate = new Date(e.target.value);
+                updateDateDisplay(selectedDate);
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-date {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 10px 0;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .sexel-date input {
+        padding: 8px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .sexel-date-display {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-date">
+    <div class="sexel-date">
+        <!-- Date input picker -->
+        <input type="date" id="date-input" class="sexel-date-input">
+        <!-- Formatted date display -->
+        <div class="sexel-date-display" id="date-display"></div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-dialog' component using the Sexel framework
+    Sexel.tag('sexel-dialog', ['okLabel', 'cancelLabel', 'label', 'message'], {
+        ondraw: (self) => {
+            const dialog = self.querySelector('#dialog');
+            const okButton = self.querySelector('#ok-button');
+            const cancelButton = self.querySelector('#cancel-button');
+            const dialogTitle = self.querySelector('#dialog-label');
+            const dialogMessage = self.querySelector('#dialog-message');
+
+            // Set the label, okLabel, cancelLabel, and message if provided
+            dialogTitle.textContent = self.label() || 'Dialog';  // Default label
+            okButton.textContent = self.okLabel() || 'OK';  // Default "OK" button label
+            cancelButton.textContent = self.cancelLabel() || 'Cancel';  // Default "Cancel" button label
+            dialogMessage.textContent = self.message() || '';  // Default message content
+
+            // Function to close the dialog
+            const closeDialog = () => {
+                dialog.classList.remove('active');  // Hide the dialog
+            };
+
+            // Attach event listeners to the buttons
+            cancelButton.onclick = closeDialog;
+            okButton.onclick = closeDialog;
+
+            // Function to open the dialog
+            self.open = () => {
+                dialog.classList.add('active');  // Show the dialog
+            };
+
+            // Function to close the dialog (can be called externally)
+            self.close = closeDialog;
+        }
+    });
+</script>
+
+<style>
+    /* Modal background */
+    .dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    /* When the dialog is active, show it */
+    .dialog-overlay.active {
+        display: flex;
+    }
+
+    /* Modal container with border, background, and padding */
+    .dialog-container {
+        background-color: white;
+        padding: 20px;
+        width: 400px;
+        border-radius: 8px;
+        border: 2px solid #ccc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+    }
+
+    /* Modal header */
+    .dialog-header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    /* Modal message */
+    .dialog-message {
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* Modal buttons */
+    .dialog-buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .dialog-buttons button {
+        padding: 10px 20px;
+        margin-left: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .ok-button {
+	background-color: rgb(100,142,174);
+        color: white;
+    }
+    .ok-button:hover {
+        background-color: rgb(87,101,112);
+        color: white;
+    }
+
+
+    .cancel-button {
+        background-color: rgb(128,128,128);
+        color: white;
+    }
+    .cancel-button:hover {
+        background-color: rgb(64,64,64);
+        color: white;
+	}
+</style>
+
+<template id="sexel-dialog">
+    <div class="dialog-overlay" id="dialog">
+        <div class="dialog-container">
+            <div class="dialog-header" id="dialog-label">Dialog Label</div>
+            <div class="dialog-message" id="dialog-message"></div> <!-- Message will go here -->
+            <div class="dialog-buttons">
+                <button id="cancel-button" class="cancel-button">Cancel</button>
+                <button id="ok-button" class="ok-button">OK</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-footer' component using the Sexel framework
+    Sexel.tag('sexel-footer', [], {
+        ondraw: (self) => {
+            const footer = self.querySelector('#sexel-footer');
+            footer.textContent = "© 2024 David J. Goehrig <dave@dloh.org> - All Rights Reserved";  // Example footer content
+        }
+    });
+</script>
+
+<style>
+    /* Make the footer stick to the bottom of the page */
+    .sexel-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 15px 0;
+        font-family: 'Arial', sans-serif;
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+</style>
+
+<template id="sexel-footer">
+    <div id="sexel-footer" class="sexel-footer"></div>
+</template>
+
+<script>
+    // Define the 'sexel-form' component using the Sexel framework
+    Sexel.tag('sexel-form', ['fields', 'action'], {
+        ondraw: (self) => {
+            const formElement = self.querySelector('#form-element');
+            const formTable = self.querySelector('#form-table');
+            const fieldsConfig = JSON.parse(self.fields()); // Parse the fields object
+
+            // Clear any previously rendered content
+            formTable.innerHTML = '';
+	    const labels = Object.keys(fieldsConfig)
+
+            // Iterate over the fields object to create rows
+            labels.forEach((label) => {
+                const type = fieldsConfig[label];
+
+                // Create a table row
+                const row = document.createElement('tr');
+
+                // Create the label cell
+                const labelCell = document.createElement('td');
+                labelCell.textContent = label;
+                labelCell.classList.add('form-label');
+                row.appendChild(labelCell);
+
+                // Create the input cell
+                const inputCell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = type || 'text';  // Default type is 'text'
+                input.name = label.toLowerCase().replace(/\s+/g, '_');  // Generate a name attribute based on the label
+                input.classList.add('form-input');
+                inputCell.appendChild(input);
+                row.appendChild(inputCell);
+
+                // Append the row to the form table
+                formTable.appendChild(row);
+            });
+
+            // Add a submit button row at the end
+            const submitRow = document.createElement('tr');
+            const submitCell = document.createElement('td');
+            submitCell.colSpan = 2;  // Make the submit button span across both columns
+	    submitCell.classList.add('form-submit-cell');
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.textContent = 'Submit';
+            submitButton.classList.add('form-submit');
+            submitCell.appendChild(submitButton);
+            submitRow.appendChild(submitCell);
+            formTable.appendChild(submitRow);
+
+            // Attach onsubmit event to the form element
+            formElement.onsubmit = (e) => {
+                e.preventDefault(); // Prevent the default form submission
+		const values = {}
+		formElement.querySelectorAll('input').forEach( (input) => {
+			values[input.name] = input.value
+		})
+		console.log(self.action(),values)
+                fsm(self.action(), values); // Invoke the fsm action
+            }
+        }
+    });
+</script>
+
+<style>
+    /* Basic styling for the form table */
+    .form-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+	padding: 20px;
+        font-family: 'Arial', sans-serif;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+.form-table td, .form-table th {
+   padding-right: 10px;
+   padding-left: 10px;
+}
+
+    .form-label {
+        padding: 10px;
+        font-weight: bold;
+        text-align: left;
+	vertical-align: top;
+    }
+
+.form-input {
+        padding: 10px;
+        width: 100%;
+        border: 1px solid #ccc;
+}
+
+/* Submit button styling */
+.form-submit {
+        padding: 10px 20px;
+        border: none;
+        background-color: rgb(100,142,174);
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 4px;
+	margin: auto 0 auto;
+	text-align: right;
+}
+
+.form-submit:hover {
+	background-color: rgb(87,101,112);
+}
+
+td.form-submit-cell {
+    text-align: right;  /* Align content in the cell to the right */
+    padding-right: 10px;  /* Add some padding to separate the button from the content */
+    padding-bottom: 10px;  /* Add some padding to separate the button from the content */
+}
+</style>
+
+<template id="sexel-form">
+    <form id="form-element">
+        <table class="form-table" id="form-table"></table>
+    </form>
+</template>
+
+<script>
+Sexel.tag('sexel-grid', ['columns', 'rows', 'gap'], {
+	ondraw: (self) => {
+		const children = [...self.children]
+		children.pop()
+		const content = self.querySelector('#content')
+		const columns = self.columns() || '1fr'
+		const rows = self.rows() || 'auto'
+		const gap = self.gap() || '10px'
+		content.style.gridTemplateColumns = columns
+		content.style.gridTemplateRows = rows
+		content.style.gap = gap
+		var i = 0
+		console.log(children)
+		for (const child of children) {
+			if (child.className == "sexel-grid") break;
+			self.removeChild(child)
+			child.classList.add('.' + i++)
+			console.log(child)
+			console.log(child.classList)
+			content.appendChild(child);
+		}
+	}
+});
+</script>
+
+<style>
+#content {
+	display: grid;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 20px;
+}
+</style>
+
+<template id="sexel-grid">
+<div class="sexel-gird" id="content"></div>
+</template>
+
+<script>
+Sexel.tag('sexel-header', ['logo','value'], {
+	ondraw: (self) => {
+		const logo = self.querySelector('#logo')
+		const title = self.querySelector('#value')
+		const rightHeader = self.querySelector("#right-content")
+		logo.src = self.logo()
+		title.textContent = self.value()
+		if (self.innerHTML.trim() === "") return;
+		for (const child of self.children) {
+			if (child.className == "sexel-header") break;
+			self.removeChild(child)
+			rightHeader.appendChild(child)
+		}
+	}
+});
+</script>
+
+<style>
+.sexel-header {
+	display: flex;
+	align-items: center;
+	background-color: #f9f9f9;
+	padding: 10px 20px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	justify-content: space-between;
+}
+
+#logo {
+	width: 50px;
+	height: 50px;
+	margin-right: 20px;
+}
+
+#value {
+	font-weight: bold;
+	font-size: 32px;
+	color: #333;
+}
+
+#left-content {
+	display: flex;
+	margin-left: 0;
+	align-items: center;
+}
+
+#right-content {
+	display: flex;
+	align-items: center;
+	padding-right: 5%;
+}
+</style>
+
+<template id="sexel-header">
+<div class="sexel-header" class="shadow">
+<div id="left-content"><img id="logo" alt="Logo" /><span id="value"></span> </div>
+<div id="right-content"></div>
+</div>
+</template>
+
+<script>
+    // Define the 'sexel-list' component using the Sexel framework
+    Sexel.tag('sexel-list', ['data', 'decorators'], {
+        ondraw: (self) => {
+            const listContainer = self.querySelector('#list-container');
+            const data = JSON.parse(self.data() || '[]');  // Parse the JSON data
+            const decorators = JSON.parse(self.decorators() || '[]');  // Parse the optional decorators
+            const isOrdered = self.getAttribute('type') === 'ordered';  // Check if it is an ordered list
+            
+            // Clear any previous list
+            listContainer.innerHTML = '';
+
+            // Recursive function to generate list elements
+            const generateList = (items, level = 0) => {
+                const list = document.createElement(isOrdered ? 'ol' : 'ul');
+
+                // Apply different icons for indentation levels if decorators are provided
+                if (decorators[level]) {
+                    list.style.listStyleType = `"${decorators[level]}"`;  // Use a custom decorator for this level
+                }
+
+                items.forEach(item => {
+                    const listItem = document.createElement('li');
+
+                    if (typeof item === 'object' && !Array.isArray(item)) {
+                        const itemLabel = Object.keys(item)[0];  // Get the label (key)
+                        const childItems = item[itemLabel];  // Get the child items (value)
+                        
+                        // Append the label for this item
+                        listItem.textContent = itemLabel;
+
+                        // Recursively add children
+                        listItem.appendChild(generateList(childItems, level + 1));
+                    } else {
+                        // Simple array item
+                        listItem.textContent = item;
+                    }
+
+                    list.appendChild(listItem);
+                });
+
+                return list;
+            };
+
+            // Generate and append the list
+            const listElement = generateList(data);
+            listContainer.appendChild(listElement);
+        }
+    });
+</script>
+
+<style>
+    .sexel-list {
+        width: 100%;
+        padding: 10px;
+        font-family: 'Arial', sans-serif;
+        font-size: 14px;
+    }
+
+    .sexel-list ul,
+    .sexel-list ol {
+        margin: 0;
+        padding-left: 20px;  /* Indentation for nested items */
+        list-style-type: disc;  /* Default list style */
+    }
+
+    .sexel-list li {
+        margin-bottom: 5px;
+    }
+</style>
+
+<template id="sexel-list">
+    <div class="sexel-list" id="list-container"></div>
+</template>
+
+<script>
+Sexel.tag('sexel-menu', ['orientation', 'items'], {
+	ondraw: (self) => {
+		const container = self.querySelector('#menu');
+		const orientation = self.orientation() || 'horizontal';
+		container.classList.remove('horizontal', 'vertical');
+		container.classList.add(orientation === 'vertical' ? 'vertical' : 'horizontal');
+		container.innerHTML = ''
+		const buttonNames = self.items().split(',');
+		console.log(buttonNames)
+		buttonNames.forEach((name) => {
+			console.log(name)
+			const label = name.trim()
+			const button = document.createElement('button');
+			button.textContent = label
+			button.setAttribute('data-name', label);
+			button.onclick = (e) => fsm(label,self,e)
+			container.appendChild(button)
+		});
+	}
+});
+</script>
+
+<style>
+.sexel-menu {
+	display: flex;
+	justify-content: center;
+	padding: 10px;
+}
+
+.horizontal {
+	flex-direction: row;
+}
+
+.vertical {
+	flex-direction: column;
+}
+
+.sexel-menu button {
+	border: none;
+	margin: 0px;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 10px;
+	border-radius: 0px;
+}
+
+.sexel-menu button:hover {
+}
+</style>
+
+<template id="sexel-menu">
+<div id="menu" class="sexel-menu"></div>
+</template>
+
+<script>
+    // Define the 'sexel-modal' component using the Sexel framework
+    Sexel.tag('sexel-modal', ['header', 'okLabel', 'cancelLabel'], {
+        ondraw: (self) => {
+            const modalOverlay = self.querySelector('#modal-overlay');
+            const modalContainer = self.querySelector('#modal-container');
+            const okButton = self.querySelector('#ok-button');
+            const cancelButton = self.querySelector('#cancel-button');
+            const modalHeader = self.querySelector('#modal-header');
+
+            // Clone and move the original content into the modal content area
+            const contentSlot = self.querySelector('#modal-content');
+            const originalContent = [...self.childNodes];  // Capture all child nodes
+            originalContent.forEach(node => {
+                contentSlot.appendChild(node.cloneNode(true));  // Clone and move original content
+                node.remove();  // Remove original content from DOM to avoid display issues
+            });
+
+            // Set modal header and button labels
+            modalHeader.textContent = self.header() || 'Modal';  // Default header
+            okButton.textContent = self.okLabel() || 'OK';  // Default OK button label
+            cancelButton.textContent = self.cancelLabel() || 'Cancel';  // Default Cancel button label
+
+            // Functions to open and close the modal
+            const closeModal = () => {
+                modalOverlay.classList.remove('active');  // Hide the modal
+            };
+
+            const openModal = () => {
+                modalOverlay.classList.add('active');  // Show the modal
+            };
+
+            // Attach event listeners
+            okButton.onclick = closeModal;
+            cancelButton.onclick = closeModal;
+
+            // Make open and close functions accessible
+            self.open = openModal;
+            self.close = closeModal;
+        }
+    });
+</script>
+
+<style>
+    /* Modal overlay */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    /* Modal container with shadow, padding, and border */
+    .modal-container {
+        background-color: white;
+        padding: 20px;
+        max-width: 600px;
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #ccc;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modal header */
+    .modal-header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    /* Modal content */
+    .modal-content {
+        margin-bottom: 20px;
+    }
+
+    /* Modal buttons */
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .modal-buttons button {
+        padding: 10px 20px;
+        margin-left: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .ok-button {
+        background-color: rgb(100, 142, 174);
+        color: white;
+    }
+
+    .ok-button:hover {
+        background-color: rgb(87, 101, 112);
+        color: white;
+    }
+
+    .cancel-button {
+        background-color: rgb(128, 128, 128);
+        color: white;
+    }
+
+    .cancel-button:hover {
+        background-color: rgb(64, 64, 64);
+        color: white;
+    }
+</style>
+
+<template id="sexel-modal">
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-container" id="modal-container">
+            <div class="modal-header" id="modal-header">Modal Header</div>
+            <div class="modal-content" id="modal-content"></div> <!-- Cloned content will be placed here -->
+            <div class="modal-buttons">
+                <button id="cancel-button" class="cancel-button">Cancel</button>
+                <button id="ok-button" class="ok-button">OK</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-notification' component using the Sexel framework
+    Sexel.tag('sexel-notification', ['header', 'message', 'type', 'dismissable'], {
+        ondraw: (self) => {
+            const notificationContainer = self.querySelector('#notification-container');
+            const headerElement = self.querySelector('#notification-header');
+            const messageElement = self.querySelector('#notification-message');
+            const closeButton = self.querySelector('#close-button');
+            
+            // Set the header and message if provided
+            headerElement.textContent = self.header() || 'Notification';
+            messageElement.textContent = self.message() || 'This is a notification';
+
+            // Set the notification type (info, success, warning, error) and apply corresponding styles
+            const notificationType = self.type() || 'info';
+            notificationContainer.className = `notification ${notificationType}`;
+
+            // Show or hide the close button based on 'dismissable' attribute
+            if (self.dismissable()) {
+                closeButton.style.display = 'inline';
+            } else {
+                closeButton.style.display = 'none';
+            }
+
+            // Add event listener for close button to hide the notification
+            closeButton.onclick = () => {
+                notificationContainer.style.display = 'none';
+            };
+	  
+            self.open = () => {
+                notificationContainer.style.display = 'block';
+	    }
+            
+	    self.close = () => {
+                notificationContainer.style.display = 'none';
+	    }
+        }
+    });
+</script>
+
+<style>
+    /* Basic styling for notification */
+    .notification {
+        padding: 20px;
+        border-radius: 5px;
+        margin: 10px 0;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    /* Notification types */
+    .notification.info {
+        background-color: #e7f3fe;
+        color: #3178c6;
+    }
+
+    .notification.success {
+        background-color: #e6ffed;
+        color: #27a745;
+    }
+
+    .notification.warning {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .notification.error {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Title styling */
+    .notification-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    /* Close button styling */
+    .notification-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+</style>
+
+<template id="sexel-notification">
+    <div id="notification-container" class="notification">
+        <span id="notification-header" class="notification-header"></span>
+        <p id="notification-message" class="notification-message"></p>
+        <button id="close-button" class="notification-close">&times;</button>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-pages' component using the Sexel framework
+    Sexel.tag('sexel-pages', ['itemsPerPage'], {
+        ondraw: (self) => {
+            const pageContainer = self.querySelector('#page-container');
+            const paginationControls = self.querySelector('#pagination-controls');
+            const originalContent = [...self.childNodes];  // Capture all child nodes
+            const itemsPerPage = parseInt(self.itemsPerPage()) || 5;  // Default to 5 items per page
+            let currentPage = 1;
+            let totalItems = 0;
+            let totalPages = 0;
+
+            // Function to render items for the current page
+            const renderPage = () => {
+                pageContainer.innerHTML = '';  // Clear current content
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageItems = originalContent.slice(start, end);
+                pageItems.forEach(item => {
+                    pageContainer.appendChild(item.cloneNode(true));  // Clone and display items for this page
+                });
+                updatePaginationControls();
+            };
+
+            // Function to update pagination controls (previous/next buttons)
+            const updatePaginationControls = () => {
+                paginationControls.innerHTML = '';  // Clear controls
+
+                // Create "Previous" button
+                const prevButton = document.createElement('button');
+                prevButton.textContent = 'Previous';
+                prevButton.disabled = (currentPage === 1);
+                prevButton.onclick = () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPage();
+                    }
+                };
+                paginationControls.appendChild(prevButton);
+
+                // Create page number display
+                const pageDisplay = document.createElement('span');
+                pageDisplay.textContent = ` Page ${currentPage} of ${totalPages} `;
+                paginationControls.appendChild(pageDisplay);
+
+                // Create "Next" button
+                const nextButton = document.createElement('button');
+                nextButton.textContent = 'Next';
+                nextButton.disabled = (currentPage === totalPages);
+                nextButton.onclick = () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPage();
+                    }
+                };
+                paginationControls.appendChild(nextButton);
+            };
+
+            // Initialization function
+            const initializePagination = () => {
+                totalItems = originalContent.length;
+                totalPages = Math.ceil(totalItems / itemsPerPage);
+                renderPage();
+            };
+
+            // Remove the original content from the DOM to prevent it from being displayed initially
+            originalContent.forEach(node => node.remove());
+
+            // Initialize the pagination
+            initializePagination();
+        }
+    });
+</script>
+
+<style>
+    .sexel-pages {
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        align-items: center;
+    }
+
+    .pagination-controls button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        background-color: rgb(100, 142, 174);
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: bold;
+        margin: 0 5px;
+    }
+
+    .pagination-controls button:disabled {
+        background-color: rgb(192, 192, 192);
+        cursor: not-allowed;
+    }
+
+    .pagination-controls span {
+        font-size: 14px;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-pages">
+    <div class="sexel-pages">
+        <!-- Page content will be dynamically rendered here -->
+        <div id="page-container"></div>
+
+        <!-- Pagination controls (previous, next buttons) -->
+        <div class="pagination-controls" id="pagination-controls"></div>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-progress' component using the Sexel framework
+    Sexel.tag('sexel-progress', ['value', 'max', 'label'], {
+        ondraw: (self) => {
+            const progressBar = self.querySelector('#progress-bar');
+            const label = self.querySelector('#progress-label');
+
+            // Get progress progresss and apply default if missing
+            const progress = parseInt(self.value()) || 0;
+            const max = parseInt(self.max()) || 100;
+            const progressPercent = Math.min((progress / max) * 100, 100); // Limit to 100%
+	    console.log(progressPercent)
+
+            // Update label and progress bar width
+            label.textContent = `${progress} / ${max}`;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+    });
+</script>
+
+<style>
+    #sexel-progress {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 500px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f1f1f1;
+        padding: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    #progress-bar-container {
+        width: 100%;
+        height: 30px;
+        background-color: #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #progress-bar {
+        height: 100%;
+        background-color: rgb(100, 142, 174);
+        width: 0; 
+        transition: width 0.8s ease-in-out;
+    }
+
+    #progress-label {
+        margin-top: 10px;
+        font-size: 14px;
+        text-align: center;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
+
+<template id="sexel-progress">
+    <div id="sexel-progress">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="progress-label"></div> <!-- Progress percentage or custom label -->
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-rating' component using the Sexel framework
+    Sexel.tag('sexel-rating', ['max', 'value', 'char'], {
+        ondraw: (self) => {
+            const ratingContainer = self.querySelector('#rating-container');
+            const maxStars = parseInt(self.max()) || 5;  // Default to 5 stars
+            let ratingValue = parseInt(self.value()) || 0;  // Default to 0 (no rating)
+            const character = self.char() || '★';  // Default character is a star
+
+            // Render stars based on the current rating
+            const renderStars = () => {
+                ratingContainer.innerHTML = '';  // Clear previous stars
+
+                for (let i = 1; i <= maxStars; i++) {
+                    const star = document.createElement('span');
+                    star.textContent = character;  // Use the provided character
+                    star.classList.add('star');
+                    
+                    if (i <= ratingValue) {
+                        star.classList.add('selected');
+                    }
+
+                    // Click event to set the rating
+                    star.onclick = () => {
+                        ratingValue = i;
+                        self.value(ratingValue);  // Update the 'value' attribute
+                        renderStars();  // Re-render the stars
+                    };
+
+                    ratingContainer.appendChild(star);
+                }
+            };
+
+            // Initialize the stars
+            renderStars();
+        }
+    });
+</script>
+
+<style>
+    .sexel-rating {
+        display: inline-block;
+    }
+
+    .star {
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        color: #ccc;  /* Default unselected star color */
+    }
+
+    .star.selected {
+        color: rgb(255, 215, 0);  /* Gold color for selected stars */
+    }
+
+    .star:hover {
+        color: rgb(255, 185, 15);  /* Slightly different color on hover */
+    }
+</style>
+
+<template id="sexel-rating">
+    <div class="sexel-rating" id="rating-container"></div>
+</template>
+
+<script>
+    // Define the 'sexel-search' component using the Sexel framework
+    Sexel.tag('sexel-search', ['placeholder', 'action'], {
+        ondraw: (self) => {
+            const searchInput = self.querySelector('#search-input');
+            const searchButton = self.querySelector('#search-button');
+
+            // Set placeholder from the attribute if provided
+            searchInput.placeholder = self.placeholder() || 'Search...';
+
+            // Attach the search action
+            searchButton.onclick = (e) => {
+                const query = searchInput.value;
+                fsm(self.action(), query, self, e);  // Use FSM to handle search action
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-search {
+        display: flex;
+        align-items: center;
+        margin: 10px;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    .sexel-search input {
+        flex: 1;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .sexel-search button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        background-color: rgb(100, 142, 174);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .sexel-search button:hover {
+        background-color: rgb(87, 101, 112);
+    }
+</style>
+
+<template id="sexel-search">
+    <div class="sexel-search">
+        <input type="text" id="search-input" />
+        <button id="search-button">Search</button>
+    </div>
+</template>
+
+<script>
+Sexel.tag('sexel-sidebar', ['position'], {
+	ondraw: (self) => {
+		const sidebar = self.querySelector('#sidebar-container')
+		const content = self.querySelector('#content')
+		const position = self.position() || 'left'
+		const children = [...self.children]
+		for (const child of children) {
+			if (child.className == 'sexel-sidebar') break;
+			self.removeChild(child)
+			content.appendChild(child)	
+		}
+		content.classList.add('sidebar-' + position)
+	}
+});
+</script>
+
+<style>
+.sexel-sidebar {
+	display: flex;
+	top: 0;
+	bottom: 0;
+	width: 250px;
+	background-color: #f9f9f9;
+	border: 1px solid #ccc;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+	overflow-y: auto;
+	transform: translateX(-100%);
+	transition: transform 0.3s ease;
+}
+
+.sidebar-left {
+	left: 0;
+}
+
+.sidebar-right {
+	right: 0;
+	transform: translateX(100%);
+}
+
+.sidebar-content {
+	padding: 15px;
+}
+
+</style>
+
+<template id="sexel-sidebar">
+<div class="sexel-sidebar" id="content">
+</div>
+</template>
+
+<script>
+    // Define the 'sexel-slider' component using the Sexel framework
+    Sexel.tag('sexel-slider', ['min', 'max', 'value', 'label'], {
+        ondraw: (self) => {
+            const sliderInput = self.querySelector('#slider-input');
+            const sliderValueLabel = self.querySelector('#slider-value');
+            const label = self.querySelector('#slider-label');
+
+            // Set the initial values from attributes or default values
+            const min = self.min() || 0;
+            const max = self.max() || 100;
+            const value = self.value() || 50;
+
+            sliderInput.min = min;
+            sliderInput.max = max;
+            sliderInput.value = value;
+
+            // Display the current value and label
+            sliderValueLabel.textContent = `${value}`;
+            label.textContent = self.label() || '';
+
+            // Handle input change to update value
+            sliderInput.oninput = (e) => {
+                const newValue = e.target.value;
+                sliderValueLabel.textContent = `${newValue}`;
+                self.value(newValue);  // Update the 'value' attribute
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-slider {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .slider-label {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .slider-input {
+        width: 100%;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 10px;
+        background: #ddd;
+        outline: none;
+        border-radius: 5px;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background-color: rgb(100, 142, 174);
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .slider-input::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background-color: rgb(100, 142, 174);
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .slider-value {
+        font-size: 14px;
+        color: #333;
+        margin-top: 5px;
+    }
+</style>
+
+<template id="sexel-slider">
+    <div class="sexel-slider">
+        <span class="slider-label" id="slider-label"></span>
+        <input type="range" id="slider-input" class="slider-input" />
+        <span class="slider-value" id="slider-value"></span>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-spinner' component using the Sexel framework
+    Sexel.tag('sexel-spinner', ['shown'], {
+        ondraw: (self) => {
+            const spinnerElement = self.querySelector('#spinner');
+            spinnerElement.classList.add('spinner');
+
+            // Method to show the spinner (display: block)
+            self.open = () => {
+                spinnerElement.style.display = 'block';
+            };
+
+            // Method to hide the spinner (display: none)
+            self.close = () => {
+                spinnerElement.style.display = 'none';
+            };
+
+            // Initially, the spinner is hidden
+            if (self.shown()) self.open();
+        }
+    });
+</script>
+
+<style>
+    /* Spinner container */
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);  /* Light border */
+        border-top: 4px solid rgb(100, 142, 174);  /* Darker top border */
+        border-radius: 50%;  /* Make the shape circular */
+        animation: spin 1s linear infinite;  /* Spin animation */
+        display: none;  /* Initially hidden */
+    }
+
+    /* Keyframe for spin animation */
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);  /* Start the rotation */
+        }
+        100% {
+            transform: rotate(360deg);  /* End the rotation */
+        }
+    }
+</style>
+
+<template id="sexel-spinner">
+    <div id="spinner"></div>
+</template>
+
+<script>
+    // Define the 'sexel-tabs' component using the Sexel framework
+    Sexel.tag('sexel-tabs', ['tabs'], {
+        ondraw: (self) => {
+            const tabsContainer = self.querySelector('#tabs-container');
+            const contentContainer = self.querySelector('#content-container');
+            
+            // Parse the `tabs` attribute as an array of objects
+            const tabsConfig = JSON.parse(self.tabs());
+
+            // Clear the previous content
+            tabsContainer.innerHTML = '';
+            contentContainer.innerHTML = '';
+
+            // Create tabs dynamically
+            tabsConfig.forEach((tabConfig, index) => {
+                const { label, color, content } = tabConfig;
+
+                // Create tab button
+                const tabButton = document.createElement('button');
+                tabButton.textContent = label;
+                tabButton.style.backgroundColor = color || '#ddd';  // Default color if none provided
+                tabButton.classList.add('tab-button');
+                tabButton.onclick = () => {
+                    // Set the active tab
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    tabButton.classList.add('active');
+
+                    // Display the corresponding tab content
+                    contentContainer.innerHTML = content;
+                };
+
+                // Add the tab button to the tabs container
+                tabsContainer.appendChild(tabButton);
+
+                // Activate the first tab by default
+                if (index === 0) {
+                    tabButton.classList.add('active');
+                    contentContainer.innerHTML = content;
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Styling for the tabs component */
+    .tabs-container {
+        display: flex;
+        border-bottom: 2px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    .tab-button {
+        padding: 10px 40px;
+        border: none;
+        cursor: pointer;
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        border-radius: 4px 4px 0 0;
+        margin-right: 10px;
+        outline: none;
+	color: rgb(64,64,64);
+    }
+
+    .tab-button.active {
+        font-weight: bold;
+        border-bottom: 2px solid white;
+    }
+
+    .tab-button:hover {
+        background-color: #f0f0f0;
+    }
+
+    .content-container {
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+</style>
+
+<template id="sexel-tabs">
+    <div class="tabs-container" id="tabs-container"></div>
+    <div class="content-container" id="content-container"></div>
+</template>
+
+<script>
+    // Define the 'sexel-tooltip' component using the Sexel framework
+    Sexel.tag('sexel-tooltip', ['message', 'position'], {
+        ondraw: (self) => {
+            const tooltipWrapper = self.querySelector('#tooltip-wrapper');
+            const tooltipMessage = self.querySelector('#tooltip-message');
+            tooltipWrapper.innerHTML = ''; // Clear any existing content
+
+            // Clone the original content inside the tooltip wrapper
+            const originalContent = [...self.childNodes];
+            originalContent.forEach((node) => {
+                tooltipWrapper.appendChild(node.cloneNode(true));
+                node.remove();
+            });
+
+            // Set the tooltip message and position
+            tooltipMessage.textContent = self.message() || 'Tooltip message';
+            const position = self.position() || 'top'; // Default position is 'top'
+            tooltipMessage.classList.add(`tooltip-${position}`);
+
+            // Show and hide tooltip on hover
+            tooltipWrapper.onmouseover = () => {
+                tooltipMessage.style.display = 'block';
+            };
+            tooltipWrapper.onmouseout = () => {
+                tooltipMessage.style.display = 'none';
+            };
+        }
+    });
+</script>
+
+<style>
+    /* Tooltip container */
+    .tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    /* Tooltip text */
+    .tooltip-message {
+        display: none;
+        position: absolute;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 8px;
+        z-index: 1000;
+        font-size: 12px;
+        max-width: 200px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    }
+
+    /* Tooltip positions */
+    .tooltip-top {
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+    }
+
+    .tooltip-bottom {
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 8px;
+    }
+
+    .tooltip-left {
+        top: 50%;
+        right: 100%;
+        transform: translateY(-50%);
+        margin-right: 8px;
+    }
+
+    .tooltip-right {
+        top: 50%;
+        left: 100%;
+        transform: translateY(-50%);
+        margin-left: 8px;
+    }
+</style>
+
+<template id="sexel-tooltip">
+    <div class="tooltip-wrapper" id="tooltip-wrapper">
+        <!-- This is where the original content will be cloned -->
+        <span class="tooltip-message" id="tooltip-message"></span>
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-upload' component using the Sexel framework
+    Sexel.tag('sexel-upload', ['label', 'multiple', 'accept'], {
+        ondraw: (self) => {
+            const input = self.querySelector('#file-input');
+            const label = self.querySelector('#upload-label');
+            const fileList = self.querySelector('#file-list');
+
+            // Set label
+            label.textContent = self.label() || 'Upload Files';  // Default label
+
+            // Handle multiple attribute
+            if (self.multiple() === 'true') {
+                input.setAttribute('multiple', 'multiple');
+            }
+
+            // Set accepted file types
+            if (self.accept()) {
+                input.setAttribute('accept', self.accept());
+            }
+
+            // Clear file list on re-render
+            fileList.innerHTML = '';
+
+            // Event handler for file input
+            input.onchange = (e) => {
+                const files = e.target.files;
+
+                // Clear the file list before updating it
+                fileList.innerHTML = '';
+
+                // Display the selected files
+                Array.from(files).forEach(file => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+                    fileList.appendChild(listItem);
+                });
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-upload {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        border: 1px solid #ccc;
+        padding: 16px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: 'Arial', sans-serif;
+    }
+
+    .sexel-upload input {
+        display: none;
+    }
+
+    .sexel-upload label {
+        background-color: rgb(100, 142, 174);
+        color: rgb(250, 250, 250);
+        padding: 10px;
+        text-align: center;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .sexel-upload label:hover {
+        background-color: rgb(87, 101, 112);
+    }
+
+    .sexel-upload ul {
+        margin-top: 10px;
+        list-style-type: none;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .sexel-upload li {
+        padding: 5px 0;
+    }
+</style>
+
+<template id="sexel-upload">
+    <div class="sexel-upload">
+        <ul id="file-list"></ul> <!-- Display uploaded file names here -->
+        <label id="upload-label" for="file-input">Upload Files</label>
+        <input type="file" id="file-input" />
+    </div>
+</template>
+
+<script>
+    // Define the 'sexel-video' component using the Sexel framework
+    Sexel.tag('sexel-video', ['src', 'controls'], {
+        ondraw: (self) => {
+            const videoElement = self.querySelector('#video-element');
+            const playPauseButton = self.querySelector('#play-pause-button');
+            const fullscreenButton = self.querySelector('#fullscreen-button');
+            const popoutButton = self.querySelector('#popout-button');
+            const controlsContainer = self.querySelector('#video-controls');
+
+            // Set the video source from the src attribute
+            videoElement.src = self.src() || '';
+            videoElement.controls = self.controls() === 'true';  // Show default video controls if "controls" attribute is true
+
+            // Toggle play/pause functionality
+            playPauseButton.onclick = () => {
+                if (videoElement.paused) {
+                    videoElement.play();
+                    playPauseButton.textContent = 'Pause';
+                } else {
+                    videoElement.pause();
+                    playPauseButton.textContent = 'Play';
+                }
+            };
+
+            // Fullscreen functionality
+            fullscreenButton.onclick = () => {
+                if (videoElement.requestFullscreen) {
+                    videoElement.requestFullscreen();
+                } else if (videoElement.webkitRequestFullscreen) {  // Safari
+                    videoElement.webkitRequestFullscreen();
+                } else if (videoElement.msRequestFullscreen) {  // IE11
+                    videoElement.msRequestFullscreen();
+                }
+            };
+
+            // Popout functionality (opens the video in a new window)
+            popoutButton.onclick = () => {
+                const videoWindow = window.open('', '_blank', 'width=640,height=360');
+                if (videoWindow) {
+                    videoWindow.document.write(`
+                        <video controls autoplay style="width: 100%; height: auto;">
+                            <source src="${videoElement.src}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `);
+                }
+            };
+
+            // Show or hide controls on hover
+            self.onmouseover = () => {
+                controlsContainer.style.display = 'flex';
+            };
+
+            self.onmouseout = () => {
+                controlsContainer.style.display = 'none';
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-video {
+        position: relative;
+        width: 100%;
+        max-width: 640px;
+        background-color: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-element {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .video-controls {
+        display: none;
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .video-button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 12px;
+    }
+
+    .video-button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<template id="sexel-video">
+    <div class="sexel-video">
+        <!-- Video Element -->
+        <video id="video-element" class="video-element">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Custom Video Controls -->
+        <div class="video-controls" id="video-controls">
+            <button id="play-pause-button" class="video-button">Play</button>
+            <button id="fullscreen-button" class="video-button">Fullscreen</button>
+            <button id="popout-button" class="video-button">Popout</button>
+        </div>
+    </div>
+</template>
+

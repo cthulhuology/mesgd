@@ -1,0 +1,57 @@
+<script>
+Sexel.tag('sexel-carousel', ['delay'], {
+	ondraw: (self) => {
+		const carousel = self.querySelector('#carousel');
+		const children = [...self.children]
+		for (const child of children) {
+			if (child.id =="carousel") break;
+			self.removeChild(child)
+			carousel.appendChild(child)
+		}
+		const slides = [...carousel.querySelectorAll('.carousel-slide')]
+		let currentIndex = 0
+		let intervalId;
+		const delay = parseInt(self.delay()) || 3000;
+		const showSlide = (index) => {
+			slides.forEach((slide, i) => {
+			    slide.style.display = (i === index) ? 'flex' : 'none';
+			});
+		}
+		const nextSlide = () => {
+			currentIndex = (currentIndex + 1) % slides.length;
+			showSlide(currentIndex);
+		}
+		showSlide(currentIndex);
+		const startCarousel = () => {
+			intervalId = setInterval(nextSlide, delay);
+		}
+		const stopCarousel = () => {
+			clearInterval(intervalId)
+		}
+		startCarousel();
+	}
+})
+</script>
+
+<style>
+#carousel {
+display: flex;
+overflow: hidden;
+margin: 0 auto;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+max-width: 200px; 
+}
+.carousel-slide {
+display: none;
+transition: opacity 1s ease-in-out;
+}
+.carousel-slide.active {
+display: flex;
+}
+</style>
+
+<template id="sexel-carousel">
+<div id="carousel"></div>
+</template>
+

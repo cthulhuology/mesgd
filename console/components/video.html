@@ -1,0 +1,122 @@
+<script>
+    // Define the 'sexel-video' component using the Sexel framework
+    Sexel.tag('sexel-video', ['src', 'controls'], {
+        ondraw: (self) => {
+            const videoElement = self.querySelector('#video-element');
+            const playPauseButton = self.querySelector('#play-pause-button');
+            const fullscreenButton = self.querySelector('#fullscreen-button');
+            const popoutButton = self.querySelector('#popout-button');
+            const controlsContainer = self.querySelector('#video-controls');
+
+            // Set the video source from the src attribute
+            videoElement.src = self.src() || '';
+            videoElement.controls = self.controls() === 'true';  // Show default video controls if "controls" attribute is true
+
+            // Toggle play/pause functionality
+            playPauseButton.onclick = () => {
+                if (videoElement.paused) {
+                    videoElement.play();
+                    playPauseButton.textContent = 'Pause';
+                } else {
+                    videoElement.pause();
+                    playPauseButton.textContent = 'Play';
+                }
+            };
+
+            // Fullscreen functionality
+            fullscreenButton.onclick = () => {
+                if (videoElement.requestFullscreen) {
+                    videoElement.requestFullscreen();
+                } else if (videoElement.webkitRequestFullscreen) {  // Safari
+                    videoElement.webkitRequestFullscreen();
+                } else if (videoElement.msRequestFullscreen) {  // IE11
+                    videoElement.msRequestFullscreen();
+                }
+            };
+
+            // Popout functionality (opens the video in a new window)
+            popoutButton.onclick = () => {
+                const videoWindow = window.open('', '_blank', 'width=640,height=360');
+                if (videoWindow) {
+                    videoWindow.document.write(`
+                        <video controls autoplay style="width: 100%; height: auto;">
+                            <source src="${videoElement.src}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `);
+                }
+            };
+
+            // Show or hide controls on hover
+            self.onmouseover = () => {
+                controlsContainer.style.display = 'flex';
+            };
+
+            self.onmouseout = () => {
+                controlsContainer.style.display = 'none';
+            };
+        }
+    });
+</script>
+
+<style>
+    .sexel-video {
+        position: relative;
+        width: 100%;
+        max-width: 640px;
+        background-color: #000;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .video-element {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .video-controls {
+        display: none;
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .video-button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 12px;
+    }
+
+    .video-button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+</style>
+
+<template id="sexel-video">
+    <div class="sexel-video">
+        <!-- Video Element -->
+        <video id="video-element" class="video-element">
+            Your browser does not support the video tag.
+        </video>
+
+        <!-- Custom Video Controls -->
+        <div class="video-controls" id="video-controls">
+            <button id="play-pause-button" class="video-button">Play</button>
+            <button id="fullscreen-button" class="video-button">Fullscreen</button>
+            <button id="popout-button" class="video-button">Popout</button>
+        </div>
+    </div>
+</template>
+
